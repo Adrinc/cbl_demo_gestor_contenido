@@ -1,10 +1,14 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:path/path.dart' as p;
+import 'package:video_player/video_player.dart';
 import 'package:energy_media/models/media/media_models.dart';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 
 /// **MODO DEMO - Gestor de Videos 100% Local**
 ///
@@ -99,98 +103,94 @@ class VideosProvider extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      // Simular carga inicial
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      // Hardcodear videos desde assets/videos
-      mediaFiles = [
-        _createDemoVideo(
-          id: 1,
-          fileName: 'black_friday_spot.mp4',
-          title: 'Black Friday - Promoción Especial',
-          description:
+      // Lista de videos en assets con metadata básica
+      final videoConfigs = [
+        {
+          'fileName': 'black_friday_spot.mp4',
+          'title': 'Black Friday - Promoción Especial',
+          'description':
               'Video promocional para campaña de Black Friday con ofertas exclusivas',
-          duration: 45,
-          tags: ['promoción', 'black friday', 'ventas'],
-          reproducciones: 1250,
-        ),
-        _createDemoVideo(
-          id: 2,
-          fileName: 'disney_on_ice_lets_dance.mp4',
-          title: 'Disney On Ice - Let\'s Dance',
-          description:
+          'tags': ['promoción', 'black friday', 'ventas'],
+          'reproducciones': 1250
+        },
+        {
+          'fileName': 'disney_on_ice_lets_dance.mp4',
+          'title': 'Disney On Ice - Let\'s Dance',
+          'description':
               'Espectáculo de patinaje artístico sobre hielo con personajes de Disney',
-          duration: 120,
-          tags: ['disney', 'entretenimiento', 'familia'],
-          reproducciones: 3420,
-        ),
-        _createDemoVideo(
-          id: 3,
-          fileName: 'green_screen.mp4',
-          title: 'Green Screen - Template',
-          description:
+          'tags': ['disney', 'entretenimiento', 'familia'],
+          'reproducciones': 3420
+        },
+        {
+          'fileName': 'green_screen.mp4',
+          'title': 'Green Screen - Template',
+          'description':
               'Plantilla de fondo verde para efectos de edición de video',
-          duration: 30,
-          tags: ['template', 'edición', 'green screen'],
-          reproducciones: 890,
-        ),
-        _createDemoVideo(
-          id: 4,
-          fileName: 'healthtest.mp4',
-          title: 'Health Test - Diagnóstico',
-          description: 'Video educativo sobre pruebas de salud y bienestar',
-          duration: 90,
-          tags: ['salud', 'educativo', 'medicina'],
-          reproducciones: 567,
-        ),
-        _createDemoVideo(
-          id: 5,
-          fileName: 'hisp_heritage.mp4',
-          title: 'Hispanic Heritage Month',
-          description: 'Celebración del mes de la herencia hispana',
-          duration: 60,
-          tags: ['cultura', 'hispano', 'celebración'],
-          reproducciones: 2100,
-        ),
-        _createDemoVideo(
-          id: 6,
-          fileName: 'kimball_holiday.mp4',
-          title: 'Kimball Holiday Special',
-          description:
+          'tags': ['template', 'edición', 'green screen'],
+          'reproducciones': 890
+        },
+        {
+          'fileName': 'healthtest.mp4',
+          'title': 'Health Test - Diagnóstico',
+          'description': 'Video educativo sobre pruebas de salud y bienestar',
+          'tags': ['salud', 'educativo', 'medicina'],
+          'reproducciones': 567
+        },
+        {
+          'fileName': 'hisp_heritage.mp4',
+          'title': 'Hispanic Heritage Month',
+          'description': 'Celebración del mes de la herencia hispana',
+          'tags': ['cultura', 'hispano', 'celebración'],
+          'reproducciones': 2100
+        },
+        {
+          'fileName': 'kimball_holiday.mp4',
+          'title': 'Kimball Holiday Special',
+          'description':
               'Especial de temporada navideña con promociones exclusivas',
-          duration: 75,
-          tags: ['navidad', 'promoción', 'temporada'],
-          reproducciones: 1840,
-        ),
-        _createDemoVideo(
-          id: 7,
-          fileName: 'Lost Medicaid.mp4',
-          title: 'Lost Medicaid - Información',
-          description: 'Guía sobre cómo recuperar beneficios de Medicaid',
-          duration: 150,
-          tags: ['medicaid', 'salud', 'información'],
-          reproducciones: 456,
-        ),
-        _createDemoVideo(
-          id: 8,
-          fileName: 'Metallic phone.mp4',
-          title: 'Metallic Phone - Lanzamiento',
-          description:
+          'tags': ['navidad', 'promoción', 'temporada'],
+          'reproducciones': 1840
+        },
+        {
+          'fileName': 'Lost_Medicaid.mp4',
+          'title': 'Lost Medicaid - Información',
+          'description': 'Guía sobre cómo recuperar beneficios de Medicaid',
+          'tags': ['medicaid', 'salud', 'información'],
+          'reproducciones': 456
+        },
+        {
+          'fileName': 'Metallic_phone.mp4',
+          'title': 'Metallic Phone - Lanzamiento',
+          'description':
               'Presentación del nuevo smartphone con acabado metálico premium',
-          duration: 55,
-          tags: ['tecnología', 'smartphone', 'lanzamiento'],
-          reproducciones: 5230,
-        ),
-        _createDemoVideo(
-          id: 9,
-          fileName: 'sweetwater_authority.mp4',
-          title: 'Sweetwater Authority - Conservación',
-          description: 'Campaña de conservación de agua y recursos naturales',
-          duration: 100,
-          tags: ['agua', 'conservación', 'medio ambiente'],
-          reproducciones: 720,
-        ),
+          'tags': ['tecnología', 'smartphone', 'lanzamiento'],
+          'reproducciones': 5230
+        },
+        {
+          'fileName': 'sweetwater_authority.mp4',
+          'title': 'Sweetwater Authority - Conservación',
+          'description': 'Campaña de conservación de agua y recursos naturales',
+          'tags': ['agua', 'conservación', 'medio ambiente'],
+          'reproducciones': 720
+        },
       ];
+
+      // Cargar videos con duración y peso reales
+      mediaFiles = [];
+      for (int i = 0; i < videoConfigs.length; i++) {
+        final config = videoConfigs[i];
+        final videoFile = await _createDemoVideoWithRealData(
+          id: i + 1,
+          fileName: config['fileName'] as String,
+          title: config['title'] as String,
+          description: config['description'] as String,
+          tags: config['tags'] as List<String>,
+          reproducciones: config['reproducciones'] as int,
+        );
+        if (videoFile != null) {
+          mediaFiles.add(videoFile);
+        }
+      }
 
       // Hardcodear categorías
       categories = [
@@ -230,18 +230,44 @@ class VideosProvider extends ChangeNotifier {
     }
   }
 
-  /// Helper para crear videos de demo
-  MediaFileModel _createDemoVideo({
+  /// Helper para crear videos de demo con datos reales capturados
+  Future<MediaFileModel?> _createDemoVideoWithRealData({
     required int id,
     required String fileName,
     required String title,
     required String description,
-    required int duration,
     required List<String> tags,
     required int reproducciones,
-  }) {
+  }) async {
     final now = DateTime.now();
     final createdAt = now.subtract(Duration(days: id * 3));
+    final assetPath = 'assets/videos/$fileName';
+
+    int? realDuration;
+    int? realFileSize;
+
+    try {
+      // Capturar duración real del video de assets con timeout
+      final controller = VideoPlayerController.asset(assetPath);
+      await controller.initialize().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Timeout al inicializar video');
+        },
+      );
+      realDuration = controller.value.duration.inSeconds;
+      await controller.dispose();
+
+      // Para el peso, en web no podemos obtenerlo fácilmente de assets
+      // Usamos aproximaciones realistas según duración
+      realFileSize = (realDuration * 500000); // ~500KB por segundo (aprox)
+
+      print(
+          '✅ Asset "$fileName": ${realDuration}s, ${_formatFileSize(realFileSize)}');
+    } catch (e) {
+      print('⚠️ No se pudo cargar "$fileName": $e');
+      return null; // Saltar video si falla
+    }
 
     return MediaFileModel(
       mediaFileId: id,
@@ -251,19 +277,19 @@ class VideosProvider extends ChangeNotifier {
       fileType: 'video',
       mimeType: 'video/mp4',
       fileExtension: '.mp4',
-      fileSizeBytes: 5000000 + (id * 123456), // Tamaños simulados
-      fileUrl: 'assets/videos/$fileName',
+      fileSizeBytes: realFileSize, // ✅ Peso estimado realista
+      fileUrl: assetPath,
       storagePath: 'videos/$fileName',
       organizationFk: organizationId,
       metadataJson: {
         'uploaded_at': createdAt.toIso8601String(),
         'reproducciones': reproducciones,
         'original_file_name': fileName,
-        'duration_seconds': duration,
-        'file_size_bytes': 5000000 + (id * 123456),
+        'duration_seconds': realDuration, // ✅ Duración real
+        'file_size_bytes': realFileSize,
         'tags': tags,
       },
-      seconds: duration,
+      seconds: realDuration, // ✅ Duración real
       isPublicFile: true,
       createdAt: createdAt,
       updatedAt: createdAt,
@@ -279,7 +305,9 @@ class VideosProvider extends ChangeNotifier {
         PlutoRow(
           cells: {
             'video': PlutoCell(value: media), // Objeto completo para renderers
-            'thumbnail': PlutoCell(value: media.fileUrl),
+            'thumbnail': PlutoCell(
+                value: media.posterUrl ??
+                    media.fileUrl), // ✅ Usar poster si existe
             'title': PlutoCell(value: media.title ?? media.fileName),
             'file_description': PlutoCell(value: media.fileDescription),
             'reproducciones': PlutoCell(value: media.reproducciones),
@@ -383,8 +411,8 @@ class VideosProvider extends ChangeNotifier {
     }
   }
 
-  /// Upload video to Supabase Storage and create record
-  /// DEMO MODE: Crea video en memoria local sin persistencia
+  /// Upload video to local storage
+  /// DEMO MODE: Crea video en memoria con duración y peso reales
   Future<bool> uploadVideo({
     required String title,
     String? description,
@@ -401,56 +429,86 @@ class VideosProvider extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      // Simular delay de carga
-      await Future.delayed(const Duration(seconds: 1));
+      // Crear Blob URL del video para reproducción en web
+      String videoUrl;
+      int? capturedDuration;
 
-      // Crear URL temporal del video usando Object URL
-      final blob = webVideoBytes!;
-      // En modo demo, usar un placeholder o URL del primer video real
-      final demoVideoUrl = mediaFiles.isNotEmpty
-          ? mediaFiles.first.fileUrl
-          : 'https://placeholder-video.com/demo.mp4';
+      if (kIsWeb) {
+        // Crear Blob y Object URL para el video
+        final blob =
+            html.Blob([webVideoBytes!], _getMimeType(videoFileExtension));
+        videoUrl = html.Url.createObjectUrlFromBlob(blob);
 
-      // Crear URL temporal del poster si existe
-      String? demoPosterUrl;
-      if (webPosterBytes != null && posterName != null) {
-        // Usar poster del primer video o placeholder
-        demoPosterUrl =
-            mediaFiles.isNotEmpty && mediaFiles.first.posterUrl != null
-                ? mediaFiles.first.posterUrl
-                : null;
+        // Capturar duración real del video
+        try {
+          final controller = VideoPlayerController.network(videoUrl);
+          await controller.initialize();
+          capturedDuration = controller.value.duration.inSeconds;
+          await controller.dispose();
+          print('✅ Duración capturada: $capturedDuration segundos');
+        } catch (e) {
+          print('⚠️ No se pudo capturar duración: $e');
+          capturedDuration = durationSeconds;
+        }
+      } else {
+        // Fallback para otras plataformas (usar assets)
+        final assetsVideos = [
+          'black_friday_spot.mp4',
+          'disney_on_ice_lets_dance.mp4',
+          'green_screen.mp4',
+          'healthtest.mp4',
+          'hisp_heritage.mp4',
+          'kimball_holiday.mp4',
+          'Lost Medicaid.mp4',
+          'Metallic phone.mp4',
+          'sweetwater_authority.mp4',
+        ];
+        final randomAsset = assetsVideos[_nextMockId % assetsVideos.length];
+        videoUrl = 'assets/videos/$randomAsset';
+        capturedDuration = durationSeconds;
       }
 
-      // Crear MediaFileModel simulado
+      // Crear Blob URL del poster si existe
+      String? posterBlobUrl;
+      if (kIsWeb && webPosterBytes != null && posterName != null) {
+        final posterBlob =
+            html.Blob([webPosterBytes!], _getMimeType(posterFileExtension));
+        posterBlobUrl = html.Url.createObjectUrlFromBlob(posterBlob);
+      }
+
+      // Peso real del archivo
+      final realFileSize = webVideoBytes!.length;
+
+      // Crear MediaFileModel con datos reales
       final mockVideo = MediaFileModel(
         mediaFileId: _nextMockId++,
         fileName: videoName!,
         title: title,
-        fileDescription: description,
+        fileDescription: description ?? 'Video subido en modo demo',
         fileType: 'video',
         mimeType: _getMimeType(videoFileExtension),
         fileExtension: videoFileExtension,
-        fileSizeBytes: webVideoBytes!.length,
-        fileUrl: demoVideoUrl,
-        storagePath: 'videos/demo_${videoName!}',
+        fileSizeBytes: realFileSize, // ✅ Peso real
+        fileUrl: videoUrl, // ✅ Blob URL del video real
+        storagePath: 'videos/demo_$videoName',
         organizationFk: organizationId,
         metadataJson: {
           'uploaded_at': DateTime.now().toIso8601String(),
           'reproducciones': 0,
           'original_file_name': videoName,
-          'duration_seconds': durationSeconds,
-          'file_size_bytes': webVideoBytes!.length,
-          if (demoPosterUrl != null) 'poster_url': demoPosterUrl,
-          if (demoPosterUrl != null) 'poster_file_name': posterName,
+          'duration_seconds': capturedDuration, // ✅ Duración real capturada
+          'file_size_bytes': realFileSize, // ✅ Peso real
+          if (posterBlobUrl != null) 'poster_url': posterBlobUrl,
+          if (posterBlobUrl != null) 'poster_file_name': posterName,
           if (tags != null && tags.isNotEmpty) 'tags': tags,
         },
-        seconds: durationSeconds,
+        seconds: capturedDuration, // ✅ Duración real
         isPublicFile: true,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
-      // Agregar a lista local
+      // Agregar a lista local (al inicio para que sea visible)
       mediaFiles.insert(0, mockVideo);
 
       // Clean up
@@ -461,6 +519,12 @@ class VideosProvider extends ChangeNotifier {
 
       isLoading = false;
       notifyListeners();
+
+      print('✅ Video subido: ${mockVideo.title}');
+      print('   - Duración: ${capturedDuration}s');
+      print('   - Peso: ${_formatFileSize(realFileSize)}');
+      print('   - URL: $videoUrl');
+
       return true;
     } catch (e) {
       errorMessage = 'Error subiendo video: $e';
@@ -739,6 +803,44 @@ class VideosProvider extends ChangeNotifier {
       print('Error en getDashboardStats: $e');
       return {};
     }
+  }
+
+  /// Get total reproducciones from all videos
+  int getTotalReproducciones() {
+    int total = 0;
+    for (var media in mediaFiles) {
+      total += media.reproducciones;
+    }
+    return total;
+  }
+
+  /// Get promedio diario de reproducciones
+  int getPromedioDiario() {
+    if (mediaFiles.isEmpty) return 0;
+
+    final total = getTotalReproducciones();
+    // Calcular días desde el video más antiguo
+    final oldestVideo = mediaFiles.reduce((curr, next) =>
+        (curr.createdAt ?? DateTime.now())
+                .isBefore(next.createdAt ?? DateTime.now())
+            ? curr
+            : next);
+
+    final daysSinceOldest = DateTime.now()
+        .difference(oldestVideo.createdAt ?? DateTime.now())
+        .inDays;
+
+    if (daysSinceOldest <= 0) return total;
+
+    return (total / daysSinceOldest).round();
+  }
+
+  /// Get most viewed video
+  MediaFileModel? getMostViewedVideo() {
+    if (mediaFiles.isEmpty) return null;
+
+    return mediaFiles.reduce((curr, next) =>
+        curr.reproducciones > next.reproducciones ? curr : next);
   }
 
   /// Get top 5 videos by views from local data

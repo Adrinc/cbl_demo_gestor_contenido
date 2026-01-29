@@ -1,7 +1,8 @@
 import 'dart:convert';
-import 'dart:developer';
 
-import 'package:energy_media/helpers/globals.dart';
+/// **DEMO MODE - Token Model**
+/// Modelo de token simplificado para modo demo.
+/// La validación real de tokens está deshabilitada.
 
 class Token {
   Token({
@@ -36,25 +37,6 @@ class Token {
         "created": created,
       };
 
-  Future<bool> validate(String type) async {
-    int timeLimit = 5;
-
-    try {
-      final minutesPassed =
-          DateTime.now().toUtc().difference(created).inMinutes;
-      if (minutesPassed < timeLimit) {
-        final res = await supabase
-            .from('token')
-            .select('token_$type')
-            .eq('user_id', userId);
-        final validatedToken = res[0]['token_$type'];
-        if (token == validatedToken) return true;
-      }
-    } catch (e) {
-      log('Error en validateToken - $e');
-      return false;
-    }
-
-    return false;
-  }
+  /// DEMO MODE: Siempre retorna true (sin validación real de tokens)
+  Future<bool> validate(String type) async => true;
 }

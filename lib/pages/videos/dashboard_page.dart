@@ -15,7 +15,6 @@ class _DashboardPageState extends State<DashboardPage>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  Map<String, dynamic> stats = {};
 
   @override
   void initState() {
@@ -32,15 +31,6 @@ class _DashboardPageState extends State<DashboardPage>
       curve: Curves.easeInOut,
     ));
     _animationController.forward();
-    _loadStats();
-  }
-
-  Future<void> _loadStats() async {
-    final provider = Provider.of<VideosProvider>(context, listen: false);
-    final result = await provider.getDashboardStats();
-    setState(() {
-      stats = result;
-    });
   }
 
   @override
@@ -53,21 +43,36 @@ class _DashboardPageState extends State<DashboardPage>
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width <= 800;
 
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: SingleChildScrollView(
-        padding: EdgeInsets.all(isMobile ? 16 : 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            const Gap(24),
-            _buildStatsCards(isMobile),
-            const Gap(24),
-            _buildRecentActivity(),
-          ],
-        ),
-      ),
+    return Consumer<VideosProvider>(
+      builder: (context, provider, child) {
+        // Valores hardcodeados por defecto (mostrar mientras carga o si no hay datos)
+        final useHardcodedData =
+            provider.isLoading || provider.mediaFiles.isEmpty;
+
+        final totalVideos = useHardcodedData ? 9 : provider.mediaFiles.length;
+        final totalReproducciones =
+            useHardcodedData ? 16473 : provider.getTotalReproducciones();
+        final promedioDia =
+            useHardcodedData ? 549 : provider.getPromedioDiario();
+
+        return FadeTransition(
+          opacity: _fadeAnimation,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(isMobile ? 16 : 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(),
+                const Gap(24),
+                _buildStatsCards(
+                    isMobile, totalVideos, totalReproducciones, promedioDia),
+                const Gap(24),
+                _buildRecentActivity(provider, useHardcodedData),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -166,29 +171,33 @@ class _DashboardPageState extends State<DashboardPage>
     );
   }
 
-  Widget _buildStatsCards(bool isMobile) {
+  Widget _buildStatsCards(bool isMobile, int totalVideos,
+      int totalReproducciones, int promedioDia) {
     return isMobile
         ? Column(
             children: [
               _buildStatCard(
-                'Videos Totales',
-                stats['total_videos']?.toString() ?? '0',
+                'Total Videos',
+                totalVideos.toString(),
                 Icons.video_library,
-                AppTheme.of(context).primaryColor,
+                const Color(0xFF4EC9F5),
+                '+12%',
               ),
               const Gap(16),
               _buildStatCard(
                 'Reproducciones',
-                stats['total_reproducciones']?.toString() ?? '0',
+                totalReproducciones.toString(),
                 Icons.play_circle_filled,
-                AppTheme.of(context).secondaryColor,
+                const Color(0xFFFFB733),
+                '+23%',
               ),
               const Gap(16),
               _buildStatCard(
-                'Video más visto',
-                stats['most_viewed_video']?['title'] ?? 'N/A',
+                'Promedio/Día',
+                promedioDia.toString(),
                 Icons.trending_up,
-                AppTheme.of(context).error,
+                const Color(0xFF00C896),
+                '+18%',
               ),
             ],
           )
@@ -196,36 +205,39 @@ class _DashboardPageState extends State<DashboardPage>
             children: [
               Expanded(
                 child: _buildStatCard(
-                  'Videos Totales',
-                  stats['total_videos']?.toString() ?? '0',
+                  'Total Videos',
+                  totalVideos.toString(),
                   Icons.video_library,
-                  AppTheme.of(context).primaryColor,
+                  const Color(0xFF4EC9F5),
+                  '+12%',
                 ),
               ),
               const Gap(16),
               Expanded(
                 child: _buildStatCard(
                   'Reproducciones',
-                  stats['total_reproducciones']?.toString() ?? '0',
+                  totalReproducciones.toString(),
                   Icons.play_circle_filled,
-                  AppTheme.of(context).secondaryColor,
+                  const Color(0xFFFFB733),
+                  '+23%',
                 ),
               ),
               const Gap(16),
               Expanded(
                 child: _buildStatCard(
-                  'Video más visto',
-                  stats['most_viewed_video']?['title'] ?? 'N/A',
+                  'Promedio/Día',
+                  promedioDia.toString(),
                   Icons.trending_up,
-                  AppTheme.of(context).error,
+                  const Color(0xFF00C896),
+                  '+18%',
                 ),
               ),
             ],
           );
   }
 
-  Widget _buildStatCard(
-      String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(String title, String value, IconData icon, Color color,
+      String percentage) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -325,10 +337,14 @@ class _DashboardPageState extends State<DashboardPage>
                             color: color.withOpacity(0.3),
                           ),
                         ),
-                        child: Icon(
-                          Icons.trending_up_rounded,
-                          color: color,
-                          size: 16,
+                        child: Text(
+                          percentage,
+                          style: TextStyle(
+                            color: color,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                          ),
                         ),
                       ),
                     ],
@@ -380,7 +396,41 @@ class _DashboardPageState extends State<DashboardPage>
     );
   }
 
-  Widget _buildRecentActivity() {
+  Widget _buildRecentActivity(VideosProvider provider, bool useHardcodedData) {
+    // Datos hardcodeados para Top 5 Videos (los mismos de la imagen)
+    final hardcodedTop5 = [
+      {
+        'title': 'Metallic Phone - Lanzamiento',
+        'views': 5230,
+        'icon': Icons.emoji_events,
+        'color': Color(0xFFFFB733)
+      },
+      {
+        'title': 'Disney On Ice - Let\'s Dance',
+        'views': 3420,
+        'icon': Icons.workspace_premium,
+        'color': Color(0xFF9E9E9E)
+      },
+      {
+        'title': 'Hispanic Heritage Month',
+        'views': 2100,
+        'icon': Icons.military_tech,
+        'color': Color(0xFFCD7F32)
+      },
+      {
+        'title': 'Kimball Holiday Special',
+        'views': 1840,
+        'icon': Icons.looks_4,
+        'color': Color(0xFF4EC9F5)
+      },
+      {
+        'title': 'Black Friday - Promoción Especial',
+        'views': 1250,
+        'icon': Icons.looks_5,
+        'color': Color(0xFF6B2F8A)
+      },
+    ];
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -464,184 +514,315 @@ class _DashboardPageState extends State<DashboardPage>
                 ],
               ),
               const Gap(24),
-              Consumer<VideosProvider>(
-                builder: (context, provider, child) {
-                  if (provider.mediaFiles.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(40),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.video_library_outlined,
-                              size: 64,
-                              color: AppTheme.of(context).tertiaryText,
-                            ),
-                            const Gap(16),
-                            Text(
-                              'No hay actividad reciente',
-                              style: AppTheme.of(context).bodyText1.override(
-                                    fontFamily: 'Poppins',
-                                    color: AppTheme.of(context).tertiaryText,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-
-                  final recentVideos = provider.mediaFiles.take(5).toList();
-
-                  return Column(
-                    children: recentVideos.map((video) {
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppTheme.of(context)
-                              .primaryBackground
-                              .withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
+              // Mostrar Top 5 Videos (hardcoded o real según estado)
+              useHardcodedData
+                  ? Column(
+                      children: hardcodedTop5.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final video = entry.value;
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
                             color: AppTheme.of(context)
-                                .primaryColor
-                                .withOpacity(0.1),
+                                .primaryBackground
+                                .withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: AppTheme.of(context)
+                                  .primaryColor
+                                  .withOpacity(0.1),
+                            ),
                           ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 56,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    AppTheme.of(context).primaryColor,
-                                    AppTheme.of(context).secondaryColor,
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 56,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  color: video['color'] as Color,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: (video['color'] as Color)
+                                          .withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
                                   ],
                                 ),
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppTheme.of(context)
-                                        .primaryColor
-                                        .withOpacity(0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
+                                child: Icon(
+                                  video['icon'] as IconData,
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
+                              ),
+                              const Gap(16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      video['title'] as String,
+                                      style: AppTheme.of(context)
+                                          .bodyText1
+                                          .override(
+                                            fontFamily: 'Poppins',
+                                            color: AppTheme.of(context)
+                                                .primaryText,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
+                                          ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const Gap(6),
+                                    Text(
+                                      '${_formatNumber(video['views'] as int)} reproducciones',
+                                      style: AppTheme.of(context)
+                                          .bodyText2
+                                          .override(
+                                            fontFamily: 'Poppins',
+                                            color: AppTheme.of(context)
+                                                .tertiaryText,
+                                            fontSize: 12,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Gap(12),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      video['color'] as Color,
+                                      (video['color'] as Color)
+                                          .withOpacity(0.8),
+                                    ],
                                   ),
-                                ],
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: (video['color'] as Color)
+                                          .withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Text(
+                                  '${_formatNumber(video['views'] as int)}',
+                                  style: const TextStyle(
+                                    fontFamily: 'Poppins',
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
-                              child: const Icon(
-                                Icons.play_arrow_rounded,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                            ),
-                            const Gap(16),
-                            Expanded(
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    )
+                  : Consumer<VideosProvider>(
+                      builder: (context, provider, child) {
+                        if (provider.mediaFiles.isEmpty) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(40),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  Icon(
+                                    Icons.video_library_outlined,
+                                    size: 64,
+                                    color: AppTheme.of(context).tertiaryText,
+                                  ),
+                                  const Gap(16),
                                   Text(
-                                    video.title ?? video.fileName,
+                                    'No hay actividad reciente',
                                     style: AppTheme.of(context)
                                         .bodyText1
                                         .override(
                                           fontFamily: 'Poppins',
                                           color:
-                                              AppTheme.of(context).primaryText,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 14,
+                                              AppTheme.of(context).tertiaryText,
                                         ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const Gap(6),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.access_time_rounded,
-                                        size: 14,
-                                        color:
-                                            AppTheme.of(context).tertiaryText,
-                                      ),
-                                      const Gap(4),
-                                      Text(
-                                        'Hace ${_getTimeAgo(video.createdAt)}',
-                                        style: AppTheme.of(context)
-                                            .bodyText2
-                                            .override(
-                                              fontFamily: 'Poppins',
-                                              color: AppTheme.of(context)
-                                                  .tertiaryText,
-                                              fontSize: 12,
-                                            ),
-                                      ),
-                                    ],
                                   ),
                                 ],
                               ),
                             ),
-                            const Gap(12),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
+                          );
+                        }
+
+                        // Obtener top 5 por reproducciones
+                        final sortedVideos = List.from(provider.mediaFiles)
+                          ..sort((a, b) =>
+                              b.reproducciones.compareTo(a.reproducciones));
+                        final top5Videos = sortedVideos.take(5).toList();
+
+                        return Column(
+                          children: top5Videos.map((video) {
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    AppTheme.of(context).success,
-                                    AppTheme.of(context)
-                                        .success
-                                        .withOpacity(0.8),
-                                  ],
+                                color: AppTheme.of(context)
+                                    .primaryBackground
+                                    .withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: AppTheme.of(context)
+                                      .primaryColor
+                                      .withOpacity(0.1),
                                 ),
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppTheme.of(context)
-                                        .success
-                                        .withOpacity(0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
                               ),
                               child: Row(
-                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(
-                                    Icons.visibility_rounded,
-                                    color: Colors.white,
-                                    size: 14,
-                                  ),
-                                  const Gap(6),
-                                  Text(
-                                    '${video.reproducciones}',
-                                    style: const TextStyle(
-                                      fontFamily: 'Poppins',
+                                  Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          AppTheme.of(context).primaryColor,
+                                          AppTheme.of(context).secondaryColor,
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppTheme.of(context)
+                                              .primaryColor
+                                              .withOpacity(0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Icon(
+                                      Icons.play_arrow_rounded,
                                       color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
+                                      size: 28,
+                                    ),
+                                  ),
+                                  const Gap(16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          video.title ?? video.fileName,
+                                          style: AppTheme.of(context)
+                                              .bodyText1
+                                              .override(
+                                                fontFamily: 'Poppins',
+                                                color: AppTheme.of(context)
+                                                    .primaryText,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14,
+                                              ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const Gap(6),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.access_time_rounded,
+                                              size: 14,
+                                              color: AppTheme.of(context)
+                                                  .tertiaryText,
+                                            ),
+                                            const Gap(4),
+                                            Text(
+                                              'Hace ${_getTimeAgo(video.createdAt)}',
+                                              style: AppTheme.of(context)
+                                                  .bodyText2
+                                                  .override(
+                                                    fontFamily: 'Poppins',
+                                                    color: AppTheme.of(context)
+                                                        .tertiaryText,
+                                                    fontSize: 12,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Gap(12),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          AppTheme.of(context).success,
+                                          AppTheme.of(context)
+                                              .success
+                                              .withOpacity(0.8),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppTheme.of(context)
+                                              .success
+                                              .withOpacity(0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.visibility_rounded,
+                                          color: Colors.white,
+                                          size: 14,
+                                        ),
+                                        const Gap(6),
+                                        Text(
+                                          '${video.reproducciones}',
+                                          style: const TextStyle(
+                                            fontFamily: 'Poppins',
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  );
-                },
-              ),
+                            );
+                          }).toList(),
+                        );
+                      },
+                    ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  String _formatNumber(int number) {
+    if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(1)}K';
+    }
+    return number.toString();
   }
 
   String _getTimeAgo(DateTime? date) {

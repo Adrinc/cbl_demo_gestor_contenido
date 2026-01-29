@@ -1,39 +1,27 @@
+/// **DEMO MODE - EnergyMedia Content Manager**
+///
+/// Globals simplificados para modo demo 100% offline.
+/// Supabase y conexiones externas han sido eliminadas.
+
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pluto_grid/pluto_grid.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 
-import 'package:energy_media/helpers/supabase/queries.dart';
 import 'package:energy_media/models/models.dart';
 import 'package:energy_media/theme/theme.dart';
 
 final GlobalKey<ScaffoldMessengerState> snackbarKey =
     GlobalKey<ScaffoldMessengerState>();
 
-const storage = FlutterSecureStorage();
-
-final supabase = Supabase.instance.client;
-late SupabaseClient supabaseML;
-
 late final SharedPreferences prefs;
-late Configuration? theme;
 
 User? currentUser;
 
+/// DEMO MODE: initGlobals simplificado - solo SharedPreferences
 Future<void> initGlobals() async {
   prefs = await SharedPreferences.getInstance();
-  currentUser = await SupabaseQueries.getCurrentUserData();
-  /* //Temas de la aplicacion
-  if (currentUser == null) {
-    Configuration? conf = await SupabaseQueries.getDefaultTheme();
-    AppTheme.initConfiguration(conf);
-  } else {
-    theme = await SupabaseQueries.getUserTheme();
-    AppTheme.initConfiguration(theme);
-  }
- */
-  if (currentUser == null) return;
+  // DEMO MODE: No hay autenticación real
+  currentUser = null;
 }
 
 PlutoGridScrollbarConfig plutoGridScrollbarConfig(BuildContext context) {

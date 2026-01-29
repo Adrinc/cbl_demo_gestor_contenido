@@ -897,8 +897,7 @@ class _VideosLayoutState extends State<VideosLayout> {
             );
 
             if (confirm == true) {
-              // Cerrar sesión
-              await supabase.auth.signOut();
+              // DEMO MODE: Solo limpiar estado local y navegar
               currentUser = null; // Limpiar usuario global
               userState.logout();
 

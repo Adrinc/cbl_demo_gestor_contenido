@@ -1,6 +1,8 @@
-import 'dart:developer';
+/// **DEMO MODE - Login Form**
+///
+/// Formulario de login simplificado para modo demo.
+/// Cualquier credencial permite acceso al dashboard.
 
-import 'package:supabase_flutter/supabase_flutter.dart' as sf;
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -8,10 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'package:energy_media/helpers/globals.dart';
-import 'package:energy_media/helpers/supabase/queries.dart';
 import 'package:energy_media/providers/providers.dart';
-import 'package:energy_media/services/api_error_handler.dart';
-import 'package:energy_media/theme/theme.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -58,77 +57,24 @@ class _LoginFormState extends State<LoginForm> with TickerProviderStateMixin {
       setState(() => _isLoading = true);
       _buttonController.forward().then((_) => _buttonController.reverse());
 
-      //Login
-      try {
-        // Check if user exists
-        final userId =
-            await userState.getUserId(userState.emailController.text);
+      // DEMO MODE: Simular login con cualquier credencial
+      await Future.delayed(const Duration(milliseconds: 800));
 
-        if (userId == null) {
-          await ApiErrorHandler.callToast('Este Correo no está registrado');
-          setState(() => _isLoading = false);
-          return;
-        }
-
-        await supabase.auth.signInWithPassword(
-          email: userState.emailController.text,
-          password: userState.passwordController.text,
-        );
-
-        if (userState.recuerdame == true) {
-          await userState.setEmail();
-          await userState.setPassword();
-        } else {
-          userState.emailController.text = '';
-          userState.passwordController.text = '';
-          await prefs.remove('email');
-          await prefs.remove('password');
-        }
-
-        if (supabase.auth.currentUser == null) {
-          await ApiErrorHandler.callToast();
-          setState(() => _isLoading = false);
-          return;
-        }
-
-        currentUser = await SupabaseQueries.getCurrentUserData();
-
-        if (currentUser == null) {
-          await ApiErrorHandler.callToast();
-          setState(() => _isLoading = false);
-          return;
-        }
-        /* 
-        13: limitado
-        14: ilimitado
-         */
-
-        /* ILIMITADO */
-        print('User Role ID: ${currentUser!.role.roleId}');
-        /*    if (currentUser!.role.roleId == 14 || currentUser!.role.roleId == 13) {
-          context.pushReplacement('/book_page_main');
-          return;
-        } */
-        /* LIMITADO */
-
-        theme = await SupabaseQueries.getUserTheme();
-        AppTheme.initConfiguration(theme);
-
-        if (!mounted) return;
-
-        context.pushReplacement('/');
-      } catch (e) {
-        if (e is sf.AuthException) {
-          await userState.incrementLoginAttempts(
-            userState.emailController.text,
-          );
-          await ApiErrorHandler.callToast('Credenciales Invalidas');
-          setState(() => _isLoading = false);
-          return;
-        }
-        log('Error al iniciar sesion - $e');
-        setState(() => _isLoading = false);
+      if (userState.recuerdame == true) {
+        await userState.setEmail();
+        await userState.setPassword();
+      } else {
+        userState.emailController.text = '';
+        userState.passwordController.text = '';
+        await prefs.remove('email');
+        await prefs.remove('password');
       }
+
+      if (!mounted) return;
+
+      // DEMO MODE: Ir directo al dashboard
+      context.pushReplacement('/');
+      setState(() => _isLoading = false);
     }
 
     return Container(

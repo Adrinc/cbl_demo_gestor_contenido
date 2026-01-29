@@ -377,8 +377,31 @@ class _GestorVideosPageState extends State<GestorVideosPage> {
                           fit: BoxFit.cover,
                           width: double.infinity,
                           height: double.infinity,
-                          errorBuilder: (context, error, stackTrace) =>
-                              _buildThumbnailPlaceholder(),
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                                strokeWidth: 2,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            debugPrint('⚠️ Error cargando poster: $error');
+                            // Si el poster falla, intentar generar thumbnail del video
+                            return video.fileUrl != null &&
+                                    video.fileUrl!.isNotEmpty
+                                ? VideoThumbnailWidget(
+                                    videoUrl: video.fileUrl!,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                  )
+                                : _buildThumbnailPlaceholder();
+                          },
                         )
                       : (video.fileUrl != null && video.fileUrl!.isNotEmpty)
                           ? VideoThumbnailWidget(

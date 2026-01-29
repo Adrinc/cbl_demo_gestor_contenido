@@ -9,7 +9,7 @@ import 'package:gap/gap.dart';
 import 'package:energy_media/theme/theme.dart';
 import 'package:energy_media/models/media/media_models.dart';
 import 'package:energy_media/providers/videos_provider.dart';
-import 'package:energy_media/helpers/globals.dart';
+// import 'package:energy_media/helpers/globals.dart'; // DEMO MODE: No usado
 
 class EditVideoDialog extends StatefulWidget {
   final MediaFileModel video;
@@ -173,27 +173,14 @@ class _EditVideoDialogState extends State<EditVideoDialog> {
   }
 
   /// Guardar duración capturada en la base de datos
+  /// DEMO MODE: Actualiza solo el modelo local, sin base de datos
   Future<void> _saveDurationToDatabase(int durationSeconds) async {
     try {
-      // Actualizar tanto seconds como metadata_json
-      final response = await supabaseML
-          .from('media_files')
-          .select('metadata_json')
-          .eq('media_file_id', widget.video.mediaFileId)
-          .eq('organization_fk', VideosProvider.organizationId)
-          .single();
-
-      final metadata = response['metadata_json'] as Map<String, dynamic>? ?? {};
-      metadata['duration_seconds'] = durationSeconds;
-
-      await supabaseML
-          .from('media_files')
-          .update({
-            'seconds': durationSeconds,
-            'metadata_json': metadata,
-          })
-          .eq('media_file_id', widget.video.mediaFileId)
-          .eq('organization_fk', VideosProvider.organizationId);
+      // DEMO MODE: Solo actualiza localmente a través del provider
+      await widget.provider.updateVideoMetadata(
+        widget.video.mediaFileId,
+        {'duration_seconds': durationSeconds},
+      );
     } catch (e) {
       debugPrint('Error guardando duración: $e');
     }

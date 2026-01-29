@@ -230,26 +230,87 @@ class _PremiumViewsChartState extends State<PremiumViewsChart>
       return _buildEmptyState();
     }
 
-    // Convertir datos para la librería Graphic
-    final chartData = widget.data
-        .asMap()
-        .entries
-        .map((e) => {
-              'day': e.value.label,
-              'views': e.value.value,
-              'index': e.key,
-            })
-        .toList();
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 24, 24),
       child: SizedBox(
         height: 220,
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 400),
-          child: _buildGraphicChart(chartData),
-        ),
+        child: _buildSimpleBarChart(),
       ),
+    );
+  }
+
+  /// Chart simple sin dependencias problemáticas
+  Widget _buildSimpleBarChart() {
+    final primaryColor = AppTheme.of(context).primaryColor;
+    final secondaryColor = AppTheme.of(context).secondaryColor;
+    final tertiaryText = AppTheme.of(context).tertiaryText;
+
+    final maxValue =
+        widget.data.map((d) => d.value).reduce((a, b) => a > b ? a : b);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: widget.data.map((point) {
+        final heightPercent = maxValue > 0 ? point.value / maxValue : 0.0;
+
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                // Tooltip con valor
+                Text(
+                  point.value.toInt().toString(),
+                  style: TextStyle(
+                    color: tertiaryText,
+                    fontSize: 10,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Gap(4),
+                // Barra
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeOutCubic,
+                  width: double.infinity,
+                  height: 160 * heightPercent,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [primaryColor, secondaryColor],
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(6),
+                      topRight: Radius.circular(6),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+                const Gap(8),
+                // Label del día
+                Text(
+                  point.label,
+                  style: TextStyle(
+                    color: tertiaryText,
+                    fontSize: 11,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 

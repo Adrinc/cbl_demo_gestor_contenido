@@ -18,18 +18,18 @@ dependencies:
   intl: ^0.19.0  # Volver a la versión compatible con flutter_localizations
   go_router: ^14.6.2
   dio: ^5.7.0
-  supabase_flutter: ^1.10.25
-  flutter_secure_storage: ^9.2.4
+  # supabase_flutter: REMOVED - Demo mode doesn't use Supabase
+  # flutter_secure_storage: REMOVED - Not needed without Supabase
   pluto_grid: ^8.0.0
   google_fonts: ^6.2.1
-  google_maps: ^6.3.0
+  # google_maps: REMOVED - Not used in demo
   gap: ^3.0.1
-  dart_jsonwebtoken: ^2.17.0
+  # dart_jsonwebtoken: REMOVED - Not needed without auth
   uuid: ^4.5.1
   image_picker: ^1.1.2
   fluttertoast: ^8.2.8
   provider: ^6.1.1
-  random_password_generator: ^0.2.1
+  # random_password_generator: REMOVED - Not used
   email_validator: ^3.0.0
   file_picker: ^8.0.5
   flutter_side_menu: ^0.4.0
@@ -40,9 +40,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  # Mapa interactivo
-  flutter_map: ^7.0.2
-  latlong2: ^0.9.1
+  # Mapa interactivo - REMOVED (not used in demo)
+  # flutter_map: ^7.0.2
+  # latlong2: ^0.9.1
 
   # Paquetes adicionales del pubspec.yaml que te proporcionaron
   animated_toggle_switch: ^0.8.2
