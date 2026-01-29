@@ -1,21 +1,13 @@
-export 'package:energy_media/models/customers/recent_activity.dart';
-export 'package:energy_media/models/customers/messages.dart';
-export 'package:energy_media/models/customers/invoice.dart';
-export 'package:energy_media/models/customers/payment.dart';
-export 'package:energy_media/models/customers/transaction.dart';
-export 'package:energy_media/models/customers/credit_card.dart';
-export 'package:energy_media/models/billing/billing_process.dart';
-export 'package:energy_media/models/customers/note.dart';
-export 'package:energy_media/models/customers/customer_details.dart';
-export 'package:energy_media/models/service.dart';
-export 'package:energy_media/models/customers/bill_cycle.dart';
-export 'package:energy_media/models/state.dart';
-export 'package:energy_media/models/customers/address.dart';
-export 'package:energy_media/models/customers/customer.dart';
-export 'package:energy_media/models/configuration.dart';
+/// **DEMO MODE - Models Export**
+/// Solo se exportan los modelos necesarios para el modo demo:
+/// - users: Para autenticación mock (user, role, token)
+/// - configuration: Para temas dinámicos
+/// - media: Para gestión de videos (exportados via media/media_models.dart)
+
+// ========== USERS ==========
 export 'package:energy_media/models/users/user.dart';
 export 'package:energy_media/models/users/role.dart';
 export 'package:energy_media/models/users/token.dart';
-export 'package:energy_media/models/content_manager/ad_by_genre.dart';
-export 'package:energy_media/models/content_manager/all_ads_one_table_model.dart';
-export 'package:energy_media/models/content_manager/category_model.dart';
+
+// ========== CONFIGURATION ==========
+export 'package:energy_media/models/configuration.dart';

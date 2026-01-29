@@ -3,78 +3,129 @@
 ## Project Overview
 **EnergyMedia Content Manager** is a Flutter web application for managing multimedia content (videos, posters, categories) for the EnergyMedia platform. Single-organization focused system with video upload, categorization, playback, and analytics dashboard.
 
-**Tech Stack:** Flutter 3.1.4+, Supabase (backend/auth/storage), Provider (state), GoRouter (navigation), PlutoGrid (tables), Video Players (appinio_video_player/video_player)
+**Tech Stack:** Flutter 3.1.4+, Provider (state), GoRouter (navigation), PlutoGrid (tables), Video Players (appinio_video_player/video_player)
+
+**DEMO MODE:** This is a 100% offline demo with hardcoded data from `assets/videos/*.mp4`. No database or external APIs required.
 
 ## Architecture & Key Patterns
 
-### Dual Supabase Clients
-- `supabase` (default): Standard auth schema (`public.users`) for authentication ONLY
-- `supabaseML`: Custom `media_library` schema for all media content management
-- **Critical:** Always use `supabaseML` for media data, `supabase` for auth only
-- **Organization Filter:** ALL queries to `media_files` MUST filter by `organization_fk = 17`
-- See [lib/main.dart](lib/main.dart#L35) and [lib/helpers/globals.dart](lib/helpers/globals.dart)
+### Demo Mode Architecture
+- ✅ **100% Offline:** No Supabase, no backend, no database
+- ✅ **Hardcoded Videos:** 9 videos loaded from `assets/videos/` with real durations and file sizes
+- ✅ **In-Memory Operations:** Upload, edit, delete work locally (changes lost on reload)
+- ✅ **Real Video Loading:** Uses VideoPlayerController to capture actual duration and size
+- ✅ **Async Initialization:** Videos load asynchronously on app start
 
 ### State Management (Provider)
 All providers declared in [lib/main.dart](lib/main.dart):
-- `UserState`: Auth state and current user
+- `UserState`: Mock auth state (no real authentication)
 - `VisualStateProvider`: Theme/visual preferences (light/dark mode)
-- `VideosProvider`: Media files CRUD, upload/download, metadata management
+- `VideosProvider`: **Core demo provider** - manages all video data in memory
 - **Pattern:** Use `context.read<T>()` for one-time actions, `context.watch<T>()` for reactive UI
 
-### Navigation Structure
-```
-/login → /dashboard (stats: reproducciones, videos, categorías)
-         └── Sidemenu:
-             ├── Dashboard (default)
-             ├── Gestor de Videos (PlutoGrid con CRUD)
-             └── Configuración (placeholder - work in progress)
-```
-- **Simplified:** No empresa/negocio selection - single organization (EnergyMedia)
-- See [lib/router/router.dart](lib/router/router.dart)
+### VideosProvider Initialization Flow
+**CRITICAL:** The provider uses an async initialization pattern that UI widgets MUST respect:
 
-## Database Schema & Critical Rules
-
-### Media Library Schema (`media_library`)
-**Tables:**
-- `media_files`: Main video records (file_name, title, file_url, storage_path, metadata_json, media_category_fk, organization_fk)
-- `media_categories`: Video categories (category_name, category_description)
-- `media_posters`: Poster/thumbnail associations (media_file_id, poster_file_id)
-- View: `vw_media_files_with_posters` - Complete media info with category and poster
-
-### Organization Filter Rule
-**CRITICAL:** ALL operations on `media_files` MUST include `organization_fk = 17` filter:
 ```dart
-// CORRECT - filtered by organization
-final response = await supabaseML
-  .from('media_files')
-  .select()
-  .eq('organization_fk', 17);
+// VideosProvider flags
+bool isLoading = false;        // True during data loading
+bool isInitialized = false;    // ✅ True when initial load completes
 
-// WRONG - missing organization filter
-final response = await supabaseML
-  .from('media_files') // ❌ Returns all organizations!
-  .select();
+// Initialization sequence
+constructor() 
+  → postFrameCallback 
+  → _initializeHardcodedData() 
+  → load 9 videos from assets
+  → isInitialized = true + notifyListeners()
+  → Second notifyListeners() in postFrameCallback (ensures UI updates)
 ```
-**Always:** Insert/update operations must set `organization_fk: 17`
 
-### metadata_json Structure
-Standard fields in `media_files.metadata_json`:
-```json
-{
-  "uploaded_at": "2026-01-10T10:30:00Z",
-  "reproducciones": 150,
-  "categorias": ["tutorial", "energía"],
-  "original_file_name": "video_original.mp4",
-  "duration_seconds": 320,
-  "resolution": "1920x1080",
-  "last_viewed_at": "2026-01-10T12:00:00Z"
+**Widgets MUST wait for initialization:**
+```dart
+// ✅ CORRECT - Wait for isInitialized
+Future<void> loadData() async {
+  final provider = context.read<VideosProvider>();
+  
+  while (!provider.isInitialized && mounted) {
+    await Future.delayed(Duration(milliseconds: 100));
+  }
+  
+  // Now safe to use provider data
+  final stats = await provider.getDashboardStats();
+}
+
+// ❌ WRONG - Don't check only isLoading
+if (!provider.isLoading) {
+  // Provider might not have data yet!
 }
 ```
 
-### Supabase Storage
-**Bucket:** `energymedia`
-- `energymedia/videos/` - Video files
-- `energymedia/imagenes/` - Poster/thumbnail images
+**Why this matters:**
+- Dashboard widgets render immediately but provider loads async
+- Without waiting for `isInitialized`, widgets show 0/empty data
+- User must manually refresh to see data (bad UX)
+- Solution: All data-dependent widgets check `isInitialized` before loading
+
+### Navigation Structure
+```
+/login (mock auth) → /dashboard (stats: reproducciones, videos, categorías)
+                     └── Sidemenu:
+                         ├── Dashboard (default) - Shows stats + top 5 videos
+                         ├── Gestor de Videos (PlutoGrid con CRUD)
+                         └── Configuración (placeholder - work in progress)
+```
+- **Demo Mode:** Login bypassed with mock user, logout clears local state only
+- **Single Organization:** No empresa/negocio selection needed
+- See [lib/router/router.dart](lib/router/router.dart)
+
+## Demo Data Structure
+
+### Hardcoded Videos (assets/videos/)
+9 MP4 files with complete metadata loaded on app start:
+1. `black_friday_spot.mp4` - 1,250 views
+2. `disney_on_ice_lets_dance.mp4` - 3,420 views
+3. `green_screen.mp4` - 890 views
+4. `healthtest.mp4` - 567 views
+5. `hisp_heritage.mp4` - 2,100 views
+6. `kimball_holiday.mp4` - 1,840 views
+7. `Lost_Medicaid.mp4` - 456 views
+8. `Metallic_phone.mp4` - 5,230 views (most viewed)
+9. `sweetwater_authority.mp4` - 720 views
+
+**Total Statistics:**
+- Total Videos: 9
+- Total Reproducciones: 16,473
+- Promedio/Día: 549 (calculated from video age)
+
+### Video Loading Process
+Each video loads asynchronously with 3-second timeout:
+```dart
+// Real data capture
+VideoPlayerController.asset(path)
+  .initialize()
+  .timeout(Duration(seconds: 3))
+
+// Captures:
+- Real duration (in seconds)
+- File size (from bytes)
+
+// Fallback if timeout:
+- Simulated realistic durations (30-120s)
+- Estimated file sizes based on duration
+```
+
+### metadata_json Structure
+Standard fields in each video's metadata:
+```json
+{
+  "uploaded_at": "2026-01-10T10:30:00Z",
+  "reproducciones": 1250,
+  "original_file_name": "video_original.mp4",
+  "duration_seconds": 30,
+  "file_size_bytes": 15000000,
+  "tags": ["promoción", "ventas"]
+}
+```
 
 ## Responsive Design Standards
 **Breakpoints:** Mobile ≤800px, Tablet 801-1200px, Desktop >1200px
@@ -95,7 +146,6 @@ final isMobile = MediaQuery.of(context).size.width <= 800;
 
 ### Global State (`lib/helpers/globals.dart`)
 - `currentUser`: Authenticated user model (nullable)
-- `supabaseML`: Media Library-specific Supabase client (schema: `media_library`)
 - `plutoGridScrollbarConfig()`, `plutoGridStyleConfig()`: Consistent table styling
 - **Always check `currentUser != null` before auth-dependent operations**
 
@@ -151,46 +201,37 @@ flutter clean && flutter pub get
 3. Mobile: Use ListView with Cards, simplified forms
 4. Reference [lib/pages/videos/gestor_videos_page.dart](lib/pages/videos/gestor_videos_page.dart) for pattern
 
-### Querying Media Data
+### Working with Demo Data
 ```dart
-// CORRECT - uses media_library schema + organization filter
-final response = await supabaseML
-  .from('media_files')
-  .select()
-  .eq('organization_fk', 17)
-  .order('created_at_timestamp', ascending: false);
+// ✅ CORRECT - Wait for provider initialization
+Future<void> loadData() async {
+  final provider = context.read<VideosProvider>();
+  
+  // Wait for initial data load
+  while (!provider.isInitialized && mounted) {
+    await Future.delayed(Duration(milliseconds: 100));
+  }
+  
+  // Now safe to access data
+  final videos = provider.mediaFiles;
+  final stats = await provider.getDashboardStats();
+}
 
-// WRONG - uses default schema
-final response = await supabase
-  .from('media_files') // ❌ Table not found!
-  .select();
-
-// WRONG - missing organization filter
-final response = await supabaseML
-  .from('media_files')
-  .select(); // ❌ Returns data from ALL organizations!
+// ❌ WRONG - Access data immediately
+final videos = context.read<VideosProvider>().mediaFiles; // Empty list!
 ```
 
-### Uploading Media Files
+### Uploading Media Files (Demo Mode)
 ```dart
-// 1. Upload video to storage
-final videoPath = await supabaseML.storage
-  .from('energymedia')
-  .upload('videos/$fileName', videoBytes);
+// Demo mode: Creates in-memory video with real duration
+await videosProvider.uploadVideo(
+  title: 'Mi Video',
+  description: 'Descripción',
+  tags: ['tag1', 'tag2'],
+);
 
-// 2. Insert record with organization filter
-await supabaseML.from('media_files').insert({
-  'file_name': fileName,
-  'title': title,
-  'file_url': publicUrl,
-  'storage_path': 'videos/$fileName',
-  'organization_fk': 17, // ⚠️ REQUIRED!
-  'metadata_json': {
-    'uploaded_at': DateTime.now().toIso8601String(),
-    'reproducciones': 0,
-    'original_file_name': originalName,
-  }
-});
+// The video is added to mediaFiles list locally
+// Changes are NOT persisted (lost on reload)
 ```
 
 ### Working with Video Thumbnails
@@ -198,10 +239,8 @@ await supabaseML.from('media_files').insert({
 // Generate thumbnail from video (VideoScreenThumbnail widget)
 VideoScreenThumbnail(video: videoUrl)
 
-// Display poster from media_posters
-Image.network(posterUrl, fit: BoxFit.cover)
-
-// Fallback: Show placeholder if no poster
+// Display poster from metadata
+final posterUrl = video.metadataJson?['poster_url'];
 if (posterUrl != null) 
   Image.network(posterUrl)
 else 
@@ -240,7 +279,7 @@ lib/
 ## Testing & Debugging
 - **No formal tests yet** - manual testing in browser/device
 - Dev mode: Hot reload enabled (Flutter devtools)
-- Check browser console for Supabase RPC errors
+- Check browser console for video loading errors
 - Useful: Flutter Inspector for widget tree debugging
 
 ## Key Reference Documents
@@ -255,3 +294,4 @@ lib/
 - GoRouter `optionURLReflectsImperativeAPIs` must be `true` for proper routing
 - Mobile forms use full-screen modals, not dialogs (better UX on small screens)
 - Video thumbnails: Use `VideoScreenThumbnail` widget or fallback to category/poster image
+- **CRITICAL:** Dashboard and data-dependent widgets MUST wait for `VideosProvider.isInitialized` before loading data to avoid showing 0/empty state

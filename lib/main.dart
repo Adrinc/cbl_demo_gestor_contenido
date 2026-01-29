@@ -10,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:energy_media/providers/user_provider.dart';
 import 'package:energy_media/providers/visual_state_provider.dart';
-import 'package:energy_media/providers/users_provider.dart';
 import 'package:energy_media/providers/videos_provider.dart';
 import 'package:energy_media/helpers/globals.dart' as globals;
 import 'package:url_strategy/url_strategy.dart';
@@ -48,7 +47,6 @@ void main() async {
         ChangeNotifierProvider(create: (_) => UserState()),
         ChangeNotifierProvider(
             create: (context) => VisualStateProvider(context)),
-        ChangeNotifierProvider(create: (_) => UsersProvider()),
         ChangeNotifierProvider(create: (_) => VideosProvider()),
       ],
       child: const MyApp(),
