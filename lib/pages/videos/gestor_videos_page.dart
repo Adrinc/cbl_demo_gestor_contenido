@@ -48,17 +48,8 @@ class _GestorVideosPageState extends State<GestorVideosPage> {
   @override
   void initState() {
     super.initState();
-    _loadData();
-  }
-
-  Future<void> _loadData() async {
-    setState(() => _isLoading = true);
-    final provider = Provider.of<VideosProvider>(context, listen: false);
-    await Future.wait([
-      provider.loadMediaFiles(),
-      provider.loadCategories(),
-    ]);
-    setState(() => _isLoading = false);
+    // DEMO MODE: Datos se cargan automáticamente en VideosProvider constructor
+    _isLoading = false;
   }
 
   @override
@@ -1279,7 +1270,7 @@ class _GestorVideosPageState extends State<GestorVideosPage> {
       builder: (context) => PremiumBatchUploadDialog(
         provider: provider,
         onSuccess: () {
-          _loadData();
+          // DEMO MODE: Datos se actualizan automáticamente en el provider
         },
       ),
     );
@@ -1321,7 +1312,7 @@ class _GestorVideosPageState extends State<GestorVideosPage> {
 
     // Manejar resultado después de cerrar el diálogo
     if (result == true) {
-      await _loadData();
+      // DEMO MODE: Datos se actualizan automáticamente en el provider
 
       if (!mounted) return;
 
@@ -1350,7 +1341,7 @@ class _GestorVideosPageState extends State<GestorVideosPage> {
             backgroundColor: Colors.green,
           ),
         );
-        await _loadData();
+        // DEMO MODE: Datos se actualizan automáticamente en el provider
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

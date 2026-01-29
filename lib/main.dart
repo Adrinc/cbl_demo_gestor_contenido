@@ -5,16 +5,17 @@ import 'package:energy_media/internationalization/internationalization.dart';
 import 'package:energy_media/router/router.dart';
 import 'package:energy_media/theme/theme.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:supabase_flutter/supabase_flutter.dart'; // DEMO MODE: Deshabilitado
 
 import 'package:energy_media/providers/user_provider.dart';
 import 'package:energy_media/providers/visual_state_provider.dart';
 import 'package:energy_media/providers/users_provider.dart';
 import 'package:energy_media/providers/videos_provider.dart';
-import 'package:energy_media/helpers/globals.dart';
+import 'package:energy_media/helpers/globals.dart' as globals;
 import 'package:url_strategy/url_strategy.dart';
 
-import 'package:energy_media/helpers/constants.dart';
+// import 'package:energy_media/helpers/constants.dart'; // DEMO MODE: Deshabilitado
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -22,17 +23,22 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   setPathUrlStrategy();
-  await Supabase.initialize(
-    url: supabaseUrl,
-    anonKey: anonKey,
-    realtimeClientOptions: const RealtimeClientOptions(
-      eventsPerSecond: 2,
-    ),
-  );
 
-  supabaseML = SupabaseClient(supabaseUrl, anonKey, schema: 'media_library');
+  // DEMO MODE: Inicializar solo SharedPreferences para theme
+  globals.prefs = await SharedPreferences.getInstance();
 
-  await initGlobals();
+  // DEMO MODE: Supabase deshabilitado
+  // await Supabase.initialize(
+  //   url: supabaseUrl,
+  //   anonKey: anonKey,
+  //   realtimeClientOptions: const RealtimeClientOptions(
+  //     eventsPerSecond: 2,
+  //   ),
+  // );
+
+  // supabaseML = SupabaseClient(supabaseUrl, anonKey, schema: 'media_library');
+
+  // await initGlobals();
 
   GoRouter.optionURLReflectsImperativeAPIs = true;
 

@@ -3,15 +3,23 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pluto_grid/pluto_grid.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:video_player/video_player.dart';
 import 'package:path/path.dart' as p;
-import 'package:energy_media/helpers/globals.dart';
 import 'package:energy_media/models/media/media_models.dart';
 
+/// **MODO DEMO - Gestor de Videos 100% Local**
+///
+/// Este provider funciona completamente offline sin base de datos:
+/// - ✅ Videos hardcodeados desde assets/videos/*.mp4
+/// - ✅ Permite "subir", "editar" y "eliminar" videos (solo en memoria)
+/// - ✅ Funciona 100% offline, sin internet ni Supabase
+/// - ⚠️ Todos los cambios se pierden al recargar la aplicación
+/// - 🎯 Ideal para demos rápidas y profesionales sin dependencias externas
 class VideosProvider extends ChangeNotifier {
   // ========== ORGANIZATION CONSTANT ==========
   static const int organizationId = 17;
+
+  // ========== DEMO MODE ==========
+  int _nextMockId = 1000; // IDs para videos simulados
 
   // ========== STATE MANAGEMENT ==========
   PlutoGridStateManager? stateManager;
@@ -77,83 +85,189 @@ class VideosProvider extends ChangeNotifier {
 
   // ========== CONSTRUCTOR ==========
   VideosProvider() {
-    loadMediaFiles();
-    loadCategories();
+    // Inicializar datos en el siguiente frame para evitar setState durante build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeHardcodedData();
+    });
   }
 
   // ========== LOAD METHODS ==========
 
-  /// Load all media files with organization filter
-  Future<void> loadMediaFiles() async {
+  /// Initialize hardcoded demo data from assets
+  Future<void> _initializeHardcodedData() async {
     try {
       isLoading = true;
-      errorMessage = null;
       notifyListeners();
 
-      final response = await supabaseML
-          .from('media_files')
-          .select()
-          .eq('organization_fk', organizationId)
-          .order('created_at_timestamp', ascending: false);
+      // Simular carga inicial
+      await Future.delayed(const Duration(milliseconds: 300));
 
-      mediaFiles = (response as List<dynamic>)
-          .map((item) => MediaFileModel.fromMap(item))
-          .toList();
+      // Hardcodear videos desde assets/videos
+      mediaFiles = [
+        _createDemoVideo(
+          id: 1,
+          fileName: 'black_friday_spot.mp4',
+          title: 'Black Friday - Promoción Especial',
+          description:
+              'Video promocional para campaña de Black Friday con ofertas exclusivas',
+          duration: 45,
+          tags: ['promoción', 'black friday', 'ventas'],
+          reproducciones: 1250,
+        ),
+        _createDemoVideo(
+          id: 2,
+          fileName: 'disney_on_ice_lets_dance.mp4',
+          title: 'Disney On Ice - Let\'s Dance',
+          description:
+              'Espectáculo de patinaje artístico sobre hielo con personajes de Disney',
+          duration: 120,
+          tags: ['disney', 'entretenimiento', 'familia'],
+          reproducciones: 3420,
+        ),
+        _createDemoVideo(
+          id: 3,
+          fileName: 'green_screen.mp4',
+          title: 'Green Screen - Template',
+          description:
+              'Plantilla de fondo verde para efectos de edición de video',
+          duration: 30,
+          tags: ['template', 'edición', 'green screen'],
+          reproducciones: 890,
+        ),
+        _createDemoVideo(
+          id: 4,
+          fileName: 'healthtest.mp4',
+          title: 'Health Test - Diagnóstico',
+          description: 'Video educativo sobre pruebas de salud y bienestar',
+          duration: 90,
+          tags: ['salud', 'educativo', 'medicina'],
+          reproducciones: 567,
+        ),
+        _createDemoVideo(
+          id: 5,
+          fileName: 'hisp_heritage.mp4',
+          title: 'Hispanic Heritage Month',
+          description: 'Celebración del mes de la herencia hispana',
+          duration: 60,
+          tags: ['cultura', 'hispano', 'celebración'],
+          reproducciones: 2100,
+        ),
+        _createDemoVideo(
+          id: 6,
+          fileName: 'kimball_holiday.mp4',
+          title: 'Kimball Holiday Special',
+          description:
+              'Especial de temporada navideña con promociones exclusivas',
+          duration: 75,
+          tags: ['navidad', 'promoción', 'temporada'],
+          reproducciones: 1840,
+        ),
+        _createDemoVideo(
+          id: 7,
+          fileName: 'Lost Medicaid.mp4',
+          title: 'Lost Medicaid - Información',
+          description: 'Guía sobre cómo recuperar beneficios de Medicaid',
+          duration: 150,
+          tags: ['medicaid', 'salud', 'información'],
+          reproducciones: 456,
+        ),
+        _createDemoVideo(
+          id: 8,
+          fileName: 'Metallic phone.mp4',
+          title: 'Metallic Phone - Lanzamiento',
+          description:
+              'Presentación del nuevo smartphone con acabado metálico premium',
+          duration: 55,
+          tags: ['tecnología', 'smartphone', 'lanzamiento'],
+          reproducciones: 5230,
+        ),
+        _createDemoVideo(
+          id: 9,
+          fileName: 'sweetwater_authority.mp4',
+          title: 'Sweetwater Authority - Conservación',
+          description: 'Campaña de conservación de agua y recursos naturales',
+          duration: 100,
+          tags: ['agua', 'conservación', 'medio ambiente'],
+          reproducciones: 720,
+        ),
+      ];
+
+      // Hardcodear categorías
+      categories = [
+        MediaCategoryModel(
+          mediaCategoriesId: 1,
+          categoryName: 'Promociones',
+          categoryDescription: 'Videos promocionales y de ventas',
+        ),
+        MediaCategoryModel(
+          mediaCategoriesId: 2,
+          categoryName: 'Entretenimiento',
+          categoryDescription: 'Contenido de entretenimiento y shows',
+        ),
+        MediaCategoryModel(
+          mediaCategoriesId: 3,
+          categoryName: 'Educativo',
+          categoryDescription: 'Videos educativos e informativos',
+        ),
+        MediaCategoryModel(
+          mediaCategoriesId: 4,
+          categoryName: 'Tecnología',
+          categoryDescription: 'Lanzamientos y novedades tecnológicas',
+        ),
+      ];
+
+      _nextMockId = 100; // IDs para nuevos videos empiezan en 100
 
       await _buildPlutoRows();
 
       isLoading = false;
       notifyListeners();
     } catch (e) {
-      errorMessage = 'Error cargando videos: $e';
+      errorMessage = 'Error inicializando datos: $e';
       isLoading = false;
       notifyListeners();
-      print('Error en loadMediaFiles: $e');
+      print('Error en _initializeHardcodedData: $e');
     }
   }
 
-  /// Load media files with posters using view
-  Future<void> loadMediaWithPosters() async {
-    try {
-      isLoading = true;
-      notifyListeners();
+  /// Helper para crear videos de demo
+  MediaFileModel _createDemoVideo({
+    required int id,
+    required String fileName,
+    required String title,
+    required String description,
+    required int duration,
+    required List<String> tags,
+    required int reproducciones,
+  }) {
+    final now = DateTime.now();
+    final createdAt = now.subtract(Duration(days: id * 3));
 
-      final response = await supabaseML
-          .from('vw_media_files_with_posters')
-          .select()
-          .eq('organization_fk', organizationId)
-          .order('media_created_at', ascending: false);
-
-      mediaWithPosters = (response as List<dynamic>)
-          .map((item) => MediaWithPosterModel.fromMap(item))
-          .toList();
-
-      isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      errorMessage = 'Error cargando videos con posters: $e';
-      isLoading = false;
-      notifyListeners();
-      print('Error en loadMediaWithPosters: $e');
-    }
-  }
-
-  /// Load all categories
-  Future<void> loadCategories() async {
-    try {
-      final response = await supabaseML
-          .from('media_categories')
-          .select()
-          .order('category_name');
-
-      categories = (response as List<dynamic>)
-          .map((item) => MediaCategoryModel.fromMap(item))
-          .toList();
-
-      notifyListeners();
-    } catch (e) {
-      print('Error en loadCategories: $e');
-    }
+    return MediaFileModel(
+      mediaFileId: id,
+      fileName: fileName,
+      title: title,
+      fileDescription: description,
+      fileType: 'video',
+      mimeType: 'video/mp4',
+      fileExtension: '.mp4',
+      fileSizeBytes: 5000000 + (id * 123456), // Tamaños simulados
+      fileUrl: 'assets/videos/$fileName',
+      storagePath: 'videos/$fileName',
+      organizationFk: organizationId,
+      metadataJson: {
+        'uploaded_at': createdAt.toIso8601String(),
+        'reproducciones': reproducciones,
+        'original_file_name': fileName,
+        'duration_seconds': duration,
+        'file_size_bytes': 5000000 + (id * 123456),
+        'tags': tags,
+      },
+      seconds: duration,
+      isPublicFile: true,
+      createdAt: createdAt,
+      updatedAt: createdAt,
+    );
   }
 
   /// Build PlutoGrid rows from media files
@@ -270,6 +384,7 @@ class VideosProvider extends ChangeNotifier {
   }
 
   /// Upload video to Supabase Storage and create record
+  /// DEMO MODE: Crea video en memoria local sin persistencia
   Future<bool> uploadVideo({
     required String title,
     String? description,
@@ -286,66 +401,63 @@ class VideosProvider extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      // 1. Upload video to storage
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final sanitizedName = _sanitizeFileName(videoName!);
-      final fileName = '${timestamp}_$sanitizedName';
-      videoStoragePath = 'videos/$fileName';
+      // Simular delay de carga
+      await Future.delayed(const Duration(seconds: 1));
 
-      await supabaseML.storage.from('energymedia').uploadBinary(
-            videoStoragePath!,
-            webVideoBytes!,
-            fileOptions: const FileOptions(
-              cacheControl: '3600',
-              upsert: false,
-            ),
-          );
+      // Crear URL temporal del video usando Object URL
+      final blob = webVideoBytes!;
+      // En modo demo, usar un placeholder o URL del primer video real
+      final demoVideoUrl = mediaFiles.isNotEmpty
+          ? mediaFiles.first.fileUrl
+          : 'https://placeholder-video.com/demo.mp4';
 
-      // 2. Get public URL
-      videoUrl = supabaseML.storage
-          .from('energymedia')
-          .getPublicUrl(videoStoragePath!);
-
-      // 3. Upload poster if exists (solo storage, no DB)
-      String? posterUrlUploaded;
+      // Crear URL temporal del poster si existe
+      String? demoPosterUrl;
       if (webPosterBytes != null && posterName != null) {
-        posterUrlUploaded = await _uploadPoster();
+        // Usar poster del primer video o placeholder
+        demoPosterUrl =
+            mediaFiles.isNotEmpty && mediaFiles.first.posterUrl != null
+                ? mediaFiles.first.posterUrl
+                : null;
       }
 
-      // 4. Create media_files record (UN SOLO REGISTRO con poster en metadata_json)
-      final metadataJson = {
-        'uploaded_at': DateTime.now().toIso8601String(),
-        'reproducciones': 0,
-        'original_file_name': videoName,
-        'duration_seconds': durationSeconds,
-        'file_size_bytes': webVideoBytes!.length, // Peso del video
-        if (posterUrlUploaded != null) 'poster_url': posterUrlUploaded,
-        if (posterUrlUploaded != null) 'poster_file_name': posterName,
-        if (tags != null && tags.isNotEmpty) 'tags': tags,
-      };
+      // Crear MediaFileModel simulado
+      final mockVideo = MediaFileModel(
+        mediaFileId: _nextMockId++,
+        fileName: videoName!,
+        title: title,
+        fileDescription: description,
+        fileType: 'video',
+        mimeType: _getMimeType(videoFileExtension),
+        fileExtension: videoFileExtension,
+        fileSizeBytes: webVideoBytes!.length,
+        fileUrl: demoVideoUrl,
+        storagePath: 'videos/demo_${videoName!}',
+        organizationFk: organizationId,
+        metadataJson: {
+          'uploaded_at': DateTime.now().toIso8601String(),
+          'reproducciones': 0,
+          'original_file_name': videoName,
+          'duration_seconds': durationSeconds,
+          'file_size_bytes': webVideoBytes!.length,
+          if (demoPosterUrl != null) 'poster_url': demoPosterUrl,
+          if (demoPosterUrl != null) 'poster_file_name': posterName,
+          if (tags != null && tags.isNotEmpty) 'tags': tags,
+        },
+        seconds: durationSeconds,
+        isPublicFile: true,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
 
-      await supabaseML.from('media_files').insert({
-        'file_name': fileName,
-        'title': title,
-        'file_description': description,
-        'file_type': 'video',
-        'mime_type': _getMimeType(videoFileExtension),
-        'file_extension': videoFileExtension,
-        'file_size_bytes': webVideoBytes!.length,
-        'file_url': videoUrl,
-        'storage_path': videoStoragePath,
-        'organization_fk': organizationId,
-        'metadata_json': metadataJson,
-        'seconds': durationSeconds,
-        'is_public_file': true,
-        'uploaded_by_user_id': currentUser?.id,
-      });
+      // Agregar a lista local
+      mediaFiles.insert(0, mockVideo);
 
       // Clean up
       _clearUploadState();
 
-      // Reload data
-      await loadMediaFiles();
+      // Rebuild grid
+      await _buildPlutoRows();
 
       isLoading = false;
       notifyListeners();
@@ -356,39 +468,6 @@ class VideosProvider extends ChangeNotifier {
       notifyListeners();
       print('Error en uploadVideo: $e');
       return false;
-    }
-  }
-
-  /// Upload poster image to storage only (NO database record)
-  /// Returns the public URL of the uploaded poster
-  Future<String?> _uploadPoster() async {
-    if (webPosterBytes == null || posterName == null) return null;
-
-    try {
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final sanitizedName = _sanitizeFileName(posterName!);
-      final fileName = '${timestamp}_$sanitizedName';
-      posterStoragePath = 'imagenes/$fileName';
-
-      // Solo subir al storage, NO crear registro en media_files
-      await supabaseML.storage.from('energymedia').uploadBinary(
-            posterStoragePath!,
-            webPosterBytes!,
-            fileOptions: const FileOptions(
-              cacheControl: '3600',
-              upsert: false,
-            ),
-          );
-
-      // Obtener URL pública del poster
-      posterUrl = supabaseML.storage
-          .from('energymedia')
-          .getPublicUrl(posterStoragePath!);
-
-      return posterUrl; // Retornar solo la URL, no el ID
-    } catch (e) {
-      print('Error en _uploadPoster: $e');
-      return null;
     }
   }
 
@@ -435,15 +514,16 @@ class VideosProvider extends ChangeNotifier {
   // ========== UPDATE METHODS ==========
 
   /// Update video title
+  /// DEMO MODE: Actualiza objeto local sin persistencia
   Future<bool> updateVideoTitle(int mediaFileId, String title) async {
     try {
-      await supabaseML
-          .from('media_files')
-          .update({'title': title})
-          .eq('media_file_id', mediaFileId)
-          .eq('organization_fk', organizationId);
+      final video = mediaFiles.firstWhere((v) => v.mediaFileId == mediaFileId);
+      final index = mediaFiles.indexOf(video);
 
-      await loadMediaFiles();
+      mediaFiles[index] = video.copyWith(title: title);
+
+      await _buildPlutoRows();
+      notifyListeners();
       return true;
     } catch (e) {
       errorMessage = 'Error actualizando título: $e';
@@ -454,16 +534,17 @@ class VideosProvider extends ChangeNotifier {
   }
 
   /// Update video description
+  /// DEMO MODE: Actualiza objeto local sin persistencia
   Future<bool> updateVideoDescription(
       int mediaFileId, String description) async {
     try {
-      await supabaseML
-          .from('media_files')
-          .update({'file_description': description})
-          .eq('media_file_id', mediaFileId)
-          .eq('organization_fk', organizationId);
+      final video = mediaFiles.firstWhere((v) => v.mediaFileId == mediaFileId);
+      final index = mediaFiles.indexOf(video);
 
-      await loadMediaFiles();
+      mediaFiles[index] = video.copyWith(fileDescription: description);
+
+      await _buildPlutoRows();
+      notifyListeners();
       return true;
     } catch (e) {
       errorMessage = 'Error actualizando descripción: $e';
@@ -474,18 +555,19 @@ class VideosProvider extends ChangeNotifier {
   }
 
   /// Update video metadata
+  /// DEMO MODE: Actualiza objeto local sin persistencia
   Future<bool> updateVideoMetadata(
     int mediaFileId,
     Map<String, dynamic> metadata,
   ) async {
     try {
-      await supabaseML
-          .from('media_files')
-          .update({'metadata_json': metadata})
-          .eq('media_file_id', mediaFileId)
-          .eq('organization_fk', organizationId);
+      final video = mediaFiles.firstWhere((v) => v.mediaFileId == mediaFileId);
+      final index = mediaFiles.indexOf(video);
 
-      await loadMediaFiles();
+      mediaFiles[index] = video.copyWith(metadataJson: metadata);
+
+      await _buildPlutoRows();
+      notifyListeners();
       return true;
     } catch (e) {
       errorMessage = 'Error actualizando metadata: $e';
@@ -496,17 +578,11 @@ class VideosProvider extends ChangeNotifier {
   }
 
   /// Update video tags
+  /// DEMO MODE: Actualiza objeto local sin persistencia
   Future<bool> updateVideoTags(int mediaFileId, List<String> tags) async {
     try {
-      // Get current metadata
-      final response = await supabaseML
-          .from('media_files')
-          .select('metadata_json')
-          .eq('media_file_id', mediaFileId)
-          .eq('organization_fk', organizationId)
-          .single();
-
-      final metadata = response['metadata_json'] as Map<String, dynamic>? ?? {};
+      final video = mediaFiles.firstWhere((v) => v.mediaFileId == mediaFileId);
+      final metadata = Map<String, dynamic>.from(video.metadataJson ?? {});
       metadata['tags'] = tags;
 
       await updateVideoMetadata(mediaFileId, metadata);
@@ -520,62 +596,28 @@ class VideosProvider extends ChangeNotifier {
   }
 
   /// Update video poster
+  /// DEMO MODE: Actualiza poster en metadata local sin persistencia
   Future<bool> updateVideoPoster(
       int mediaFileId, Uint8List posterBytes, String posterName) async {
     try {
       isLoading = true;
       notifyListeners();
 
-      // Upload new poster to storage
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final sanitizedName = _sanitizeFileName(posterName);
-      final fileName = '${timestamp}_$sanitizedName';
-      final posterPath = 'imagenes/$fileName';
+      // Simular delay
+      await Future.delayed(const Duration(milliseconds: 500));
 
-      await supabaseML.storage.from('energymedia').uploadBinary(
-            posterPath,
-            posterBytes,
-            fileOptions: const FileOptions(
-              cacheControl: '3600',
-              upsert: false,
-            ),
-          );
+      final video = mediaFiles.firstWhere((v) => v.mediaFileId == mediaFileId);
+      final metadata = Map<String, dynamic>.from(video.metadataJson ?? {});
 
-      // Get public URL
-      final newPosterUrl =
-          supabaseML.storage.from('energymedia').getPublicUrl(posterPath);
+      // Usar URL de un poster existente o placeholder
+      final demoPosterUrl = mediaFiles
+          .firstWhere(
+            (v) => v.posterUrl != null && v.posterUrl!.isNotEmpty,
+            orElse: () => video,
+          )
+          .posterUrl;
 
-      // Get current metadata and old poster URL
-      final response = await supabaseML
-          .from('media_files')
-          .select('metadata_json')
-          .eq('media_file_id', mediaFileId)
-          .eq('organization_fk', organizationId)
-          .single();
-
-      final metadata = response['metadata_json'] as Map<String, dynamic>? ?? {};
-      final oldPosterUrl = metadata['poster_url'] as String?;
-
-      // Delete old poster from storage if exists
-      if (oldPosterUrl != null && oldPosterUrl.isNotEmpty) {
-        try {
-          final uri = Uri.parse(oldPosterUrl);
-          final pathSegments = uri.pathSegments;
-          final bucketIndex = pathSegments.indexOf('energymedia');
-          if (bucketIndex != -1 && bucketIndex < pathSegments.length - 1) {
-            final oldPosterPath =
-                pathSegments.sublist(bucketIndex + 1).join('/');
-            await supabaseML.storage
-                .from('energymedia')
-                .remove([oldPosterPath]);
-          }
-        } catch (e) {
-          print('Error eliminando poster antiguo: $e');
-        }
-      }
-
-      // Update metadata with new poster info
-      metadata['poster_url'] = newPosterUrl;
+      metadata['poster_url'] = demoPosterUrl;
       metadata['poster_file_name'] = posterName;
 
       await updateVideoMetadata(mediaFileId, metadata);
@@ -593,42 +635,18 @@ class VideosProvider extends ChangeNotifier {
   }
 
   /// Delete video poster only (not the video itself)
+  /// DEMO MODE: Elimina poster de metadata local sin persistencia
   Future<bool> deletePoster(int mediaFileId) async {
     try {
       isLoading = true;
       notifyListeners();
 
-      // Get current metadata
-      final response = await supabaseML
-          .from('media_files')
-          .select('metadata_json')
-          .eq('media_file_id', mediaFileId)
-          .eq('organization_fk', organizationId)
-          .single();
+      final video = mediaFiles.firstWhere((v) => v.mediaFileId == mediaFileId);
+      final metadata = Map<String, dynamic>.from(video.metadataJson ?? {});
 
-      final metadata = response['metadata_json'] as Map<String, dynamic>? ?? {};
-      final posterUrl = metadata['poster_url'] as String?;
-
-      // Delete poster from storage if exists
-      if (posterUrl != null && posterUrl.isNotEmpty) {
-        try {
-          final uri = Uri.parse(posterUrl);
-          final pathSegments = uri.pathSegments;
-          final bucketIndex = pathSegments.indexOf('energymedia');
-          if (bucketIndex != -1 && bucketIndex < pathSegments.length - 1) {
-            final posterPath = pathSegments.sublist(bucketIndex + 1).join('/');
-            await supabaseML.storage.from('energymedia').remove([posterPath]);
-          }
-        } catch (e) {
-          print('Error eliminando poster del storage: $e');
-        }
-      }
-
-      // Remove poster references from metadata
       metadata.remove('poster_url');
       metadata.remove('poster_file_name');
 
-      // Update metadata
       await updateVideoMetadata(mediaFileId, metadata);
 
       isLoading = false;
@@ -646,51 +664,19 @@ class VideosProvider extends ChangeNotifier {
   // ========== DELETE METHODS ==========
 
   /// Delete video and its storage files
+  /// DEMO MODE: Elimina video de lista local sin persistencia
   Future<bool> deleteVideo(int mediaFileId) async {
     try {
       isLoading = true;
       notifyListeners();
 
-      // Get video info
-      final response = await supabaseML
-          .from('media_files')
-          .select()
-          .eq('media_file_id', mediaFileId)
-          .eq('organization_fk', organizationId)
-          .single();
+      // Simular delay
+      await Future.delayed(const Duration(milliseconds: 300));
 
-      final storagePath = response['storage_path'] as String?;
-      final metadataJson = response['metadata_json'] as Map<String, dynamic>?;
+      // Eliminar de lista local
+      mediaFiles.removeWhere((v) => v.mediaFileId == mediaFileId);
 
-      // Delete video from storage if path exists
-      if (storagePath != null) {
-        await supabaseML.storage.from('energymedia').remove([storagePath]);
-      }
-
-      // Delete poster from storage if exists in metadata_json
-      if (metadataJson != null && metadataJson['poster_url'] != null) {
-        final posterUrl = metadataJson['poster_url'] as String;
-        // Extraer el path del storage desde la URL
-        // URL format: https://xxx.supabase.co/storage/v1/object/public/energymedia/imagenes/filename.png
-        final uri = Uri.parse(posterUrl);
-        final pathSegments = uri.pathSegments;
-
-        // Encontrar el índice después de 'energymedia' y construir el path
-        final bucketIndex = pathSegments.indexOf('energymedia');
-        if (bucketIndex != -1 && bucketIndex < pathSegments.length - 1) {
-          final posterPath = pathSegments.sublist(bucketIndex + 1).join('/');
-          await supabaseML.storage.from('energymedia').remove([posterPath]);
-        }
-      }
-
-      // Delete database record
-      await supabaseML
-          .from('media_files')
-          .delete()
-          .eq('media_file_id', mediaFileId)
-          .eq('organization_fk', organizationId);
-
-      await loadMediaFiles();
+      await _buildPlutoRows();
 
       isLoading = false;
       notifyListeners();
@@ -707,17 +693,11 @@ class VideosProvider extends ChangeNotifier {
   // ========== ANALYTICS METHODS ==========
 
   /// Increment view count
+  /// DEMO MODE: Incrementa contador local sin persistencia
   Future<bool> incrementReproduccion(int mediaFileId) async {
     try {
-      // Get current metadata
-      final response = await supabaseML
-          .from('media_files')
-          .select('metadata_json')
-          .eq('media_file_id', mediaFileId)
-          .eq('organization_fk', organizationId)
-          .single();
-
-      final metadata = response['metadata_json'] as Map<String, dynamic>? ?? {};
+      final video = mediaFiles.firstWhere((v) => v.mediaFileId == mediaFileId);
+      final metadata = Map<String, dynamic>.from(video.metadataJson ?? {});
       final currentCount = metadata['reproducciones'] ?? 0;
 
       metadata['reproducciones'] = currentCount + 1;
@@ -761,39 +741,48 @@ class VideosProvider extends ChangeNotifier {
     }
   }
 
-  /// Get top 5 videos by views using Supabase function
-  /// Returns list of maps with: media_file_id, title, file_url, storage_path, reproducciones, poster_url
+  /// Get top 5 videos by views from local data
   Future<List<Map<String, dynamic>>> getTop5VideosByViews() async {
     try {
-      final response = await supabaseML.rpc('get_top_5_videos_by_views');
+      final sortedVideos = List<MediaFileModel>.from(mediaFiles)
+        ..sort((a, b) => b.reproducciones.compareTo(a.reproducciones));
 
-      if (response == null) return [];
-
-      return (response as List<dynamic>)
-          .map((item) => Map<String, dynamic>.from(item as Map))
+      final top5 = sortedVideos
+          .take(5)
+          .map((video) => {
+                'media_file_id': video.mediaFileId,
+                'title': video.title ?? video.fileName,
+                'file_url': video.fileUrl,
+                'storage_path': video.storagePath,
+                'reproducciones': video.reproducciones,
+                'poster_url': video.posterUrl,
+              })
           .toList();
+
+      return top5;
     } catch (e) {
       print('Error en getTop5VideosByViews: $e');
       return [];
     }
   }
 
-  /// Get video metrics using Supabase function
-  /// Returns: total_videos, total_reproducciones, promedio_reproducciones_por_dia
+  /// Get video metrics from local data
   Future<Map<String, dynamic>?> getVideoMetrics() async {
     try {
-      final response = await supabaseML.rpc('get_video_metrics');
+      final totalVideos = mediaFiles.length;
+      final totalReproducciones = mediaFiles.fold<int>(
+        0,
+        (sum, video) => sum + video.reproducciones,
+      );
 
-      if (response == null || (response as List).isEmpty) return null;
-
-      // La función retorna un array con un solo objeto
-      final data = (response as List).first as Map<String, dynamic>;
+      // Calcular promedio por día (simulado)
+      final diasActivos = 30; // Simular 30 días de actividad
+      final promedioPorDia = totalReproducciones / diasActivos;
 
       return {
-        'total_videos': data['total_videos'] ?? 0,
-        'total_reproducciones': data['total_reproducciones'] ?? 0,
-        'promedio_reproducciones_por_dia':
-            data['promedio_reproducciones_por_dia'] ?? 0.0,
+        'total_videos': totalVideos,
+        'total_reproducciones': totalReproducciones,
+        'promedio_reproducciones_por_dia': promedioPorDia,
       };
     } catch (e) {
       print('Error en getVideoMetrics: $e');
@@ -802,81 +791,28 @@ class VideosProvider extends ChangeNotifier {
   }
 
   /// Update missing video durations (batch process)
+  /// DEMO MODE: Simula actualización sin procesar videos realmente
   Future<Map<String, dynamic>> updateMissingDurations(
     Function(int current, int total) onProgress,
   ) async {
     try {
-      // Obtener videos sin duración
-      final videosWithoutDuration = mediaFiles
-          .where((video) => video.seconds == null && video.fileUrl != null)
-          .toList();
+      final videosWithoutDuration =
+          mediaFiles.where((video) => video.seconds == null).toList();
 
       if (videosWithoutDuration.isEmpty) {
         return {'success': true, 'updated': 0, 'failed': 0};
       }
 
-      int updated = 0;
-      int failed = 0;
-
+      // Simular procesamiento
       for (int i = 0; i < videosWithoutDuration.length; i++) {
-        final video = videosWithoutDuration[i];
         onProgress(i + 1, videosWithoutDuration.length);
-
-        VideoPlayerController? controller;
-        try {
-          // Inicializar VideoPlayerController para obtener duración
-          controller = VideoPlayerController.network(video.fileUrl!);
-          await controller.initialize();
-
-          final durationSeconds = controller.value.duration.inSeconds;
-
-          if (durationSeconds > 0) {
-            // Obtener metadata actual
-            final response = await supabaseML
-                .from('media_files')
-                .select('metadata_json')
-                .eq('media_file_id', video.mediaFileId)
-                .eq('organization_fk', organizationId)
-                .single();
-
-            final metadata =
-                response['metadata_json'] as Map<String, dynamic>? ?? {};
-
-            // Actualizar metadata con duración
-            metadata['duration_seconds'] = durationSeconds;
-
-            // Actualizar tanto seconds como metadata_json
-            await supabaseML
-                .from('media_files')
-                .update({
-                  'seconds': durationSeconds,
-                  'metadata_json': metadata,
-                })
-                .eq('media_file_id', video.mediaFileId)
-                .eq('organization_fk', organizationId);
-
-            updated++;
-            print('✅ Video ${video.mediaFileId}: $durationSeconds segundos');
-          } else {
-            failed++;
-            print('⚠️ Video ${video.mediaFileId}: duración inválida');
-          }
-        } catch (e) {
-          print('❌ Error procesando video ${video.mediaFileId}: $e');
-          failed++;
-        } finally {
-          // Limpiar recursos del controller
-          controller?.dispose();
-        }
+        await Future.delayed(const Duration(milliseconds: 200));
       }
-
-      // Recargar datos
-      await loadMediaFiles();
 
       return {
         'success': true,
-        'updated': updated,
-        'failed': failed,
+        'updated': 0,
+        'failed': 0,
         'total': videosWithoutDuration.length,
       };
     } catch (e) {

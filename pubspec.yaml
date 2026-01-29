@@ -98,6 +98,7 @@ flutter:
   assets:
     - assets/images/
     - assets/fonts/
+    - assets/videos/
     - assets/referencia/
 
   fonts:
