@@ -242,7 +242,7 @@ class _VideosLayoutState extends State<VideosLayout> {
                     ],
                   ),
                   child: Image.asset(
-                    'assets/images/logo_nh_b.png',
+                    'assets/images/favicon.png',
                     height: 40,
                     fit: BoxFit.contain,
                   ),
@@ -257,7 +257,7 @@ class _VideosLayoutState extends State<VideosLayout> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    'Content Manager',
+                    'Content Manager DEMO',
                     style: AppTheme.of(context).bodyText1.override(
                           fontFamily: 'Poppins',
                           color: Colors.white,
