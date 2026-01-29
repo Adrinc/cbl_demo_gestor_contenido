@@ -218,7 +218,7 @@ class _VideosLayoutState extends State<VideosLayout> {
                 const Gap(16),
                 // Título moderno
                 Text(
-                  'EnergyMedia',
+                  'Content Manager',
                   style: AppTheme.of(context).subtitle1.override(
                         fontFamily: 'Poppins',
                         color: AppTheme.of(context).primaryText,
