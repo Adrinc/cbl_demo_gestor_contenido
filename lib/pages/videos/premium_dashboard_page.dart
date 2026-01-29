@@ -113,13 +113,15 @@ class _PremiumDashboardPageState extends State<PremiumDashboardPage>
                 _buildStatsCards(isMobile),
                 const Gap(32),
                 if (!isMobile) ...[
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(flex: 2, child: _buildViewsChart()),
-                      const Gap(24),
-                      Expanded(flex: 2, child: _buildTopVideos()),
-                    ],
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(flex: 2, child: _buildViewsChart()),
+                        const Gap(24),
+                        Expanded(flex: 2, child: _buildTopVideos()),
+                      ],
+                    ),
                   ),
                   const Gap(24),
                   _buildRecentActivity(),

@@ -230,13 +230,26 @@ class _PremiumViewsChartState extends State<PremiumViewsChart>
       return _buildEmptyState();
     }
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 24, 24),
-      child: SizedBox(
-        height: 220,
-        child: _buildSimpleBarChart(),
-      ),
-    );
+    final isMobile = MediaQuery.of(context).size.width <= 800;
+
+    if (isMobile) {
+      // Móvil: altura fija
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 24, 24),
+        child: SizedBox(
+          height: 220,
+          child: _buildSimpleBarChart(),
+        ),
+      );
+    } else {
+      // Desktop: expandir para llenar espacio disponible
+      return Expanded(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 24, 24),
+          child: _buildSimpleBarChart(),
+        ),
+      );
+    }
   }
 
   /// Chart simple sin dependencias problemáticas

@@ -280,11 +280,11 @@ class _VideosLayoutState extends State<VideosLayout> {
 
           // Theme Toggle minimalista
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            padding: const EdgeInsets.all(4),
+            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
               color: AppTheme.of(context).tertiaryBackground,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Consumer<VisualStateProvider>(
               builder: (context, visualProvider, _) {
@@ -295,14 +295,8 @@ class _VideosLayoutState extends State<VideosLayout> {
 
           // Botón de Salir de Demo
           Container(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
             child: _buildExitDemoButton(),
-          ),
-
-          // Botón de Logout premium
-          Container(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
-            child: _buildLogoutButton(),
           ),
         ],
       ),
@@ -659,7 +653,7 @@ class _VideosLayoutState extends State<VideosLayout> {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
         decoration: BoxDecoration(
           gradient: isSelected
               ? LinearGradient(
@@ -686,7 +680,7 @@ class _VideosLayoutState extends State<VideosLayout> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: isSelected
                     ? Colors.white.withOpacity(0.2)
@@ -698,17 +692,17 @@ class _VideosLayoutState extends State<VideosLayout> {
                 color: isSelected
                     ? Colors.white
                     : AppTheme.of(context).secondaryText,
-                size: 22,
+                size: 18,
               ),
             ),
-            const Gap(6),
+            const Gap(4),
             Text(
               label,
               style: TextStyle(
                 color: isSelected
                     ? Colors.white
                     : AppTheme.of(context).secondaryText,
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 fontFamily: 'Poppins',
                 letterSpacing: 0.5,
@@ -1022,187 +1016,13 @@ class _VideosLayoutState extends State<VideosLayout> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () async {
-            // Abrir URL externa
-            final url = Uri.parse('https://cbluna.com/');
-
-            // Mostrar diálogo informativo antes de salir
-            final confirm = await showDialog<bool>(
-              context: context,
-              builder: (context) => AlertDialog(
-                backgroundColor: AppTheme.of(context).secondaryBackground,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                title: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xFF4EC9F5),
-                            Color(0xFF6B2F8A),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.exit_to_app_rounded,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                    const Gap(16),
-                    Expanded(
-                      child: Text(
-                        '¿Salir de la Demo?',
-                        style: AppTheme.of(context).title3.override(
-                              fontFamily: 'Poppins',
-                              color: AppTheme.of(context).primaryText,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
-                content: Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Serás redirigido a cbluna.com',
-                        style: AppTheme.of(context).bodyText1.override(
-                              fontFamily: 'Poppins',
-                              color: AppTheme.of(context).secondaryText,
-                            ),
-                      ),
-                      const Gap(12),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppTheme.of(context)
-                                  .primaryColor
-                                  .withOpacity(0.1),
-                              AppTheme.of(context)
-                                  .tertiaryColor
-                                  .withOpacity(0.1),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppTheme.of(context)
-                                .primaryColor
-                                .withOpacity(0.3),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline_rounded,
-                              color: AppTheme.of(context).primaryColor,
-                              size: 20,
-                            ),
-                            const Gap(12),
-                            Expanded(
-                              child: Text(
-                                'Esta es una versión demo. Para acceso completo, visita nuestro sitio web.',
-                                style: AppTheme.of(context).bodyText3.override(
-                                      fontFamily: 'Poppins',
-                                      color: AppTheme.of(context).secondaryText,
-                                      fontSize: 13,
-                                    ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                    ),
-                    child: Text(
-                      'Cancelar',
-                      style: TextStyle(
-                        color: AppTheme.of(context).secondaryText,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFF4EC9F5),
-                          Color(0xFF6B2F8A),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF4EC9F5).withOpacity(0.4),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: TextButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.open_in_new_rounded,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                          Gap(8),
-                          Text(
-                            'Ir a CB Luna',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-
-            if (confirm == true && mounted) {
-              // Abrir en nueva pestaña usando dart:html
-              // ignore: avoid_web_libraries_in_flutter
-              // ignore: undefined_prefixed_name
-              html.window.open(url.toString(), '_blank');
-            }
+          onTap: () {
+            // Abrir directamente en nueva pestaña sin confirmación
+            html.window.open('https://cbluna.com/', '_blank');
           },
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -1212,10 +1032,10 @@ class _VideosLayoutState extends State<VideosLayout> {
                   AppTheme.of(context).tertiaryColor.withOpacity(0.15),
                 ],
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: AppTheme.of(context).primaryColor.withOpacity(0.3),
-                width: 2,
+                width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
@@ -1228,7 +1048,7 @@ class _VideosLayoutState extends State<VideosLayout> {
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -1249,10 +1069,10 @@ class _VideosLayoutState extends State<VideosLayout> {
                   child: const Icon(
                     Icons.exit_to_app_rounded,
                     color: Colors.white,
-                    size: 20,
+                    size: 18,
                   ),
                 ),
-                const Gap(16),
+                const Gap(12),
                 Expanded(
                   child: Text(
                     'Salir de la Demo',
@@ -1260,14 +1080,14 @@ class _VideosLayoutState extends State<VideosLayout> {
                           fontFamily: 'Poppins',
                           color: AppTheme.of(context).primaryColor,
                           fontWeight: FontWeight.bold,
-                          fontSize: 15,
+                          fontSize: 14,
                         ),
                   ),
                 ),
                 Icon(
                   Icons.open_in_new_rounded,
                   color: AppTheme.of(context).primaryColor,
-                  size: 16,
+                  size: 14,
                 ),
               ],
             ),
