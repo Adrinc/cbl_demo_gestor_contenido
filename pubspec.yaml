@@ -81,6 +81,9 @@ dependencies:
   countup: ^0.1.4
   video_thumbnail: ^0.5.3
   get_thumbnail_video: ^0.7.3
+  syncfusion_flutter_charts: ^27.1.58
+  syncfusion_flutter_gauges: ^27.1.58
+  syncfusion_flutter_core: ^27.1.58
 
 dev_dependencies:
   flutter_test:

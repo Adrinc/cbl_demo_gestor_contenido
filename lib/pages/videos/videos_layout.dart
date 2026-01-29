@@ -1,3 +1,4 @@
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:energy_media/providers/visual_state_provider.dart';
@@ -170,100 +171,78 @@ class _VideosLayoutState extends State<VideosLayout> {
 
   Widget _buildSideMenu() {
     return Container(
-      width: 300,
+      width: 280,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppTheme.of(context).secondaryBackground,
-            AppTheme.of(context).primaryBackground,
-          ],
-        ),
+        color: AppTheme.of(context).primaryBackground,
         border: Border(
           right: BorderSide(
-            color: AppTheme.of(context).primaryColor.withOpacity(0.15),
+            color: AppTheme.of(context).hintText,
             width: 1,
           ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 30,
-            offset: const Offset(5, 0),
-          ),
-        ],
       ),
       child: Column(
         children: [
-          // Header con gradiente premium y efecto glass
+          // Header minimalista con logo
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(32),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF42BCEE),
-                  Color(0xFF5865B5),
-                  Color(0xFF653093)
-                ],
-                stops: const [0.0, 0.5, 1.0],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF4EC9F5).withOpacity(0.4),
-                  blurRadius: 30,
-                  offset: const Offset(0, 8),
-                  spreadRadius: 2,
+              color: AppTheme.of(context).secondaryBackground,
+              border: Border(
+                bottom: BorderSide(
+                  color: AppTheme.of(context).hintText,
+                  width: 1,
                 ),
-              ],
+              ),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Logo con container elegante
+                // Logo con container moderno
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: AppTheme.of(context).primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
+                      color: AppTheme.of(context).primaryColor.withOpacity(0.3),
                       width: 2,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
                   child: Image.asset(
                     'assets/images/favicon.png',
-                    height: 40,
+                    height: 48,
                     fit: BoxFit.contain,
                   ),
                 ),
                 const Gap(16),
-                // Título con efecto
+                // Título moderno
+                Text(
+                  'EnergyMedia',
+                  style: AppTheme.of(context).subtitle1.override(
+                        fontFamily: 'Poppins',
+                        color: AppTheme.of(context).primaryText,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                        letterSpacing: 0.5,
+                      ),
+                ),
+                const Gap(4),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.25),
-                    borderRadius: BorderRadius.circular(8),
+                    color: AppTheme.of(context).primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    'Content Manager DEMO',
-                    style: AppTheme.of(context).bodyText1.override(
+                    'DEMO MODE',
+                    style: AppTheme.of(context).bodyText3.override(
                           fontFamily: 'Poppins',
-                          color: Colors.white,
+                          color: AppTheme.of(context).primaryColor,
+                          fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          letterSpacing: 1.2,
+                          letterSpacing: 1.5,
                         ),
                   ),
                 ),
@@ -271,54 +250,41 @@ class _VideosLayoutState extends State<VideosLayout> {
             ),
           ),
 
-          const Gap(24),
+          const Gap(16),
 
-          // Sección de usuario (opcional)
+          // Sección de usuario compacta
           if (currentUser != null) _buildUserSection(),
 
           const Gap(8),
 
-          // Menu Items con mejor spacing
+          // Menu Items con diseño card minimalista
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               children: _menuItems.map((item) {
                 final currentLocation =
                     GoRouterState.of(context).matchedLocation;
                 final isSelected = currentLocation == item.route;
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _buildPremiumMenuItem(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _buildModernMenuItem(
                     icon: item.icon,
                     title: item.title,
                     isSelected: isSelected,
-                    onTap: () {
-                      context.go(item.route);
-                    },
+                    onTap: () => context.go(item.route),
                   ),
                 );
               }).toList(),
             ),
           ),
 
-          // Theme Toggle mejorado
+          // Theme Toggle minimalista
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            padding: const EdgeInsets.all(6),
+            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               color: AppTheme.of(context).tertiaryBackground,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppTheme.of(context).primaryColor.withOpacity(0.2),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.of(context).primaryColor.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Consumer<VisualStateProvider>(
               builder: (context, visualProvider, _) {
@@ -327,9 +293,15 @@ class _VideosLayoutState extends State<VideosLayout> {
             ),
           ),
 
+          // Botón de Salir de Demo
+          Container(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+            child: _buildExitDemoButton(),
+          ),
+
           // Botón de Logout premium
           Container(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
             child: _buildLogoutButton(),
           ),
         ],
@@ -434,6 +406,75 @@ class _VideosLayoutState extends State<VideosLayout> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildModernMenuItem({
+    required IconData icon,
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? AppTheme.of(context).primaryColor.withOpacity(0.1)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected
+                    ? AppTheme.of(context).primaryColor.withOpacity(0.5)
+                    : Colors.transparent,
+                width: 2,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppTheme.of(context).primaryColor
+                        : AppTheme.of(context).tertiaryBackground,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: isSelected
+                        ? Colors.white
+                        : AppTheme.of(context).secondaryText,
+                    size: 18,
+                  ),
+                ),
+                const Gap(12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: AppTheme.of(context).bodyText1.override(
+                          fontFamily: 'Poppins',
+                          color: isSelected
+                              ? AppTheme.of(context).primaryColor
+                              : AppTheme.of(context).secondaryText,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -965,6 +1006,267 @@ class _VideosLayoutState extends State<VideosLayout> {
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   color: AppTheme.of(context).error,
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExitDemoButton() {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () async {
+            // Abrir URL externa
+            final url = Uri.parse('https://cbluna.com/');
+
+            // Mostrar diálogo informativo antes de salir
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                backgroundColor: AppTheme.of(context).secondaryBackground,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                title: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFF4EC9F5),
+                            Color(0xFF6B2F8A),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.exit_to_app_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    const Gap(16),
+                    Expanded(
+                      child: Text(
+                        '¿Salir de la Demo?',
+                        style: AppTheme.of(context).title3.override(
+                              fontFamily: 'Poppins',
+                              color: AppTheme.of(context).primaryText,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+                content: Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Serás redirigido a cbluna.com',
+                        style: AppTheme.of(context).bodyText1.override(
+                              fontFamily: 'Poppins',
+                              color: AppTheme.of(context).secondaryText,
+                            ),
+                      ),
+                      const Gap(12),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppTheme.of(context)
+                                  .primaryColor
+                                  .withOpacity(0.1),
+                              AppTheme.of(context)
+                                  .tertiaryColor
+                                  .withOpacity(0.1),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppTheme.of(context)
+                                .primaryColor
+                                .withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline_rounded,
+                              color: AppTheme.of(context).primaryColor,
+                              size: 20,
+                            ),
+                            const Gap(12),
+                            Expanded(
+                              child: Text(
+                                'Esta es una versión demo. Para acceso completo, visita nuestro sitio web.',
+                                style: AppTheme.of(context).bodyText3.override(
+                                      fontFamily: 'Poppins',
+                                      color: AppTheme.of(context).secondaryText,
+                                      fontSize: 13,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                    child: Text(
+                      'Cancelar',
+                      style: TextStyle(
+                        color: AppTheme.of(context).secondaryText,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFF4EC9F5),
+                          Color(0xFF6B2F8A),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF4EC9F5).withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.open_in_new_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                          Gap(8),
+                          Text(
+                            'Ir a CB Luna',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+
+            if (confirm == true && mounted) {
+              // Abrir en nueva pestaña usando dart:html
+              // ignore: avoid_web_libraries_in_flutter
+              // ignore: undefined_prefixed_name
+              html.window.open(url.toString(), '_blank');
+            }
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppTheme.of(context).primaryColor.withOpacity(0.15),
+                  AppTheme.of(context).tertiaryColor.withOpacity(0.15),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppTheme.of(context).primaryColor.withOpacity(0.3),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.of(context).primaryColor.withOpacity(0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppTheme.of(context).primaryColor,
+                        AppTheme.of(context).tertiaryColor,
+                      ],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            AppTheme.of(context).primaryColor.withOpacity(0.4),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.exit_to_app_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const Gap(16),
+                Expanded(
+                  child: Text(
+                    'Salir de la Demo',
+                    style: AppTheme.of(context).bodyText1.override(
+                          fontFamily: 'Poppins',
+                          color: AppTheme.of(context).primaryColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                  ),
+                ),
+                Icon(
+                  Icons.open_in_new_rounded,
+                  color: AppTheme.of(context).primaryColor,
                   size: 16,
                 ),
               ],

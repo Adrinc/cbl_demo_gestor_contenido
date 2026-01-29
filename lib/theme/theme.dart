@@ -133,19 +133,21 @@ abstract class AppTheme {
 
 class LightModeTheme extends AppTheme {
   @override
-  Color primaryColor = const Color(0xFF4EC9F5); // Cyan primary
+  Color primaryColor = const Color(0xFF0EA5E9); // Azul turquesa brillante
   @override
-  Color secondaryColor = const Color(0xFFFFB733); // Yellow secondary
+  Color secondaryColor = const Color(0xFFFF6B35); // Naranja vibrante
   @override
-  Color tertiaryColor = const Color(0xFF6B2F8A); // Purple accent
+  Color tertiaryColor = const Color(0xFF1E3A8A); // Azul profundo
   @override
-  Color alternate = const Color(0xFFFF7A3D); // Orange accent
+  Color alternate = const Color(0xFFFBBF24); // Amarillo dorado
   @override
   Color primaryBackground = const Color(0xFFFFFFFF); // Main background (white)
   @override
-  Color secondaryBackground = const Color(0xFFF7F7F7); // Card/Surface 1
+  Color secondaryBackground =
+      const Color(0xFFF8FAFC); // Card/Surface 1 - azul muy claro
   @override
-  Color tertiaryBackground = const Color(0xFFEFEFEF); // Card/Surface 2
+  Color tertiaryBackground =
+      const Color(0xFFE0F2FE); // Card/Surface 2 - azul pálido
   @override
   Color transparentBackground =
       const Color(0xFFFFFFFF).withOpacity(.1); // Transparent background
@@ -182,19 +184,19 @@ class LightModeTheme extends AppTheme {
 
 class DarkModeTheme extends AppTheme {
   @override
-  Color primaryColor = const Color(0xFF4EC9F5); // Cyan primary
+  Color primaryColor = const Color(0xFF06B6D4); // Cyan eléctrico
   @override
-  Color secondaryColor = const Color(0xFFFFB733); // Yellow secondary
+  Color secondaryColor = const Color(0xFFFF5C7C); // Coral/Rosa vibrante
   @override
-  Color tertiaryColor = const Color(0xFF6B2F8A); // Purple accent
+  Color tertiaryColor = const Color(0xFF7C3AED); // Púrpura profundo
   @override
-  Color alternate = const Color(0xFFFF7A3D); // Orange accent
+  Color alternate = const Color(0xFFF59E0B); // Ámbar dorado
   @override
-  Color primaryBackground = const Color(0xFF0B0B0D); // Main background (dark)
+  Color primaryBackground = const Color(0xFF0F172A); // Azul oscuro profundo
   @override
-  Color secondaryBackground = const Color(0xFF121214); // Card/Surface 1
+  Color secondaryBackground = const Color(0xFF1E293B); // Azul oscuro medio
   @override
-  Color tertiaryBackground = const Color(0xFF1A1A1D); // Card/Surface 2
+  Color tertiaryBackground = const Color(0xFF334155); // Azul gris
   @override
   Color transparentBackground =
       const Color(0xFF0B0B0D).withOpacity(.3); // Transparent background

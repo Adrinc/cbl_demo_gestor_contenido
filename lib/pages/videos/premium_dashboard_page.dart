@@ -206,9 +206,9 @@ class _PremiumDashboardPageState extends State<PremiumDashboardPage>
       crossAxisCount: 3,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 20,
-      mainAxisSpacing: 20,
-      childAspectRatio: 1.4, // Más altura para evitar overflow
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      childAspectRatio: 2.5, // ✅ Tarjetas MUY compactas
       children: cards,
     );
   }

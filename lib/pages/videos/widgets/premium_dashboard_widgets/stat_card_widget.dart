@@ -87,7 +87,6 @@ class _PremiumStatCardState extends State<PremiumStatCard>
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
-        constraints: const BoxConstraints(minHeight: 130),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           // Color sólido en lugar de gradiente para evitar blur
@@ -101,7 +100,7 @@ class _PremiumStatCardState extends State<PremiumStatCard>
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -159,13 +158,13 @@ class _PremiumStatCardState extends State<PremiumStatCard>
                     ),
                 ],
               ),
-              const Gap(12),
+              const Gap(6),
               // Valor
               Text(
                 widget.data.value.toString(),
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 32,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Poppins',
                   height: 1.0,
@@ -206,9 +205,8 @@ class _PremiumStatCardState extends State<PremiumStatCard>
             ..translate(0.0, _isHovered ? -4.0 : 0.0)
             ..scale(_isHovered ? 1.02 : 1.0),
           child: Container(
-            constraints: const BoxConstraints(minHeight: 140),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
                   color: widget.data.gradientColors.first.withOpacity(
@@ -226,7 +224,7 @@ class _PremiumStatCardState extends State<PremiumStatCard>
               ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(16),
               child: Stack(
                 children: [
                   // Background gradient
@@ -302,7 +300,7 @@ class _PremiumStatCardState extends State<PremiumStatCard>
 
   Widget _buildContent() {
     return Padding(
-      padding: const EdgeInsets.all(20), // Reducido de 24 a 20
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment:
@@ -317,12 +315,12 @@ class _PremiumStatCardState extends State<PremiumStatCard>
             ],
           ),
 
-          const Gap(12), // Reducido de 16 a 12
+          const Gap(6),
 
           // Value con animación countup
           _buildAnimatedValue(),
 
-          const Gap(4),
+          const Gap(2),
 
           // Title y subtitle
           _buildTitleSection(),
@@ -339,7 +337,7 @@ class _PremiumStatCardState extends State<PremiumStatCard>
 
   Widget _buildIconContainer() {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.2),
         borderRadius: BorderRadius.circular(16),
@@ -358,7 +356,7 @@ class _PremiumStatCardState extends State<PremiumStatCard>
       child: Icon(
         widget.data.icon,
         color: Colors.white,
-        size: 26,
+        size: 20,
       ),
     );
   }
@@ -410,7 +408,7 @@ class _PremiumStatCardState extends State<PremiumStatCard>
           separator: ',',
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 48,
+            fontSize: 32,
             fontWeight: FontWeight.bold,
             fontFamily: 'Poppins',
             height: 1.0,
@@ -449,7 +447,7 @@ class _PremiumStatCardState extends State<PremiumStatCard>
           widget.data.title,
           style: TextStyle(
             color: Colors.white.withOpacity(0.9),
-            fontSize: 32,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
             fontFamily: 'Poppins',
             letterSpacing: 0.3,
