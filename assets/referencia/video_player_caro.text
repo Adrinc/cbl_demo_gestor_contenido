@@ -1,0 +1,75 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:appinio_video_player/appinio_video_player.dart';
+
+class VideoScreenNew extends StatefulWidget {
+  final dynamic videoUrl;
+  const VideoScreenNew({Key? key, required this.videoUrl}) : super(key: key);
+
+  @override
+  _VideoScreenNewState createState() => _VideoScreenNewState();
+}
+
+class _VideoScreenNewState extends State<VideoScreenNew> {
+  late VideoPlayerController _videoPlayerController;
+
+  late CustomVideoPlayerController _customVideoPlayerController;
+  late CustomVideoPlayerWebController _customVideoPlayerWebController;
+
+  final CustomVideoPlayerSettings _customVideoPlayerSettings =
+      const CustomVideoPlayerSettings();
+
+  late CustomVideoPlayerWebSettings _customVideoPlayerWebSettings;
+
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _videoPlayerController = VideoPlayerController.network(
+      widget.videoUrl,
+    )..initialize().then((value) => setState(() {}));
+    _customVideoPlayerController = CustomVideoPlayerController(
+      context: context,
+      videoPlayerController: _videoPlayerController,
+      customVideoPlayerSettings: _customVideoPlayerSettings,
+    );
+
+    _customVideoPlayerWebSettings = CustomVideoPlayerWebSettings(
+      src: widget.videoUrl,
+    );
+
+    _customVideoPlayerWebController = CustomVideoPlayerWebController(
+      webVideoPlayerSettings: _customVideoPlayerWebSettings,
+    );
+
+    _controller = VideoPlayerController.network(widget.videoUrl)
+      ..initialize().then((_) {
+        setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    _customVideoPlayerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      backgroundColor: Colors.black,
+      child: SafeArea(
+        child: Center(
+          child: AspectRatio(
+            aspectRatio: _controller.value.aspectRatio,
+            child: CustomVideoPlayerWeb(
+              customVideoPlayerWebController: _customVideoPlayerWebController,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

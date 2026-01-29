@@ -1,0 +1,323 @@
+-- cable_por_conexion --
+
+id (uuid) (PK),
+conexion_id (uuid),
+cable_id (uuid),
+observaciones (text),
+
+-- categoria_componente --
+
+id (int4) (PK),
+nombre (text),
+
+
+-- componente --
+
+id (uuid) (PK),
+negocio_id (uuid) (FK) REFERENCES nethive.negocio.id,
+categoria_id (int4) (FK) REFERENCES nethive.categoria_componente.id,
+nombre (text),
+descripcion (text),
+ubicacion (text),
+imagen_url (text),
+en_uso (bool),
+activo (bool),
+fecha_registro (timestamp),
+distribucion_id (uuid) (FK) REFERENCES nethive.distribucion.id
+
+
+-- conexion_componente --
+
+id (uuid) (PK),
+componente_origen_id (uuid) (FK) REFERENCES nethive.componente.id,
+componente_destino_id (uuid) (FK) REFERENCES nethive.componente.id,
+descripcion (text),
+activo (bool),
+cable_id (uuid) (FK) REFERENCES nethive.componente.id
+
+-- detalle_cable --
+
+componente_id (uuid) (FK) REFERENCES nethive.componente.id,
+tipo_cable (text),
+color (text),
+tamaño (numeric),
+tipo_conector (text),
+
+
+-- detalle_equipo_activo --
+
+componente_id (uuid) (PK) (FK de nethive.componente.id)
+tipo (text)
+marca (text)
+modelo (text)
+numero_serie (text)
+especificaciones (text)
+direccion_ip (text)
+firmware (text)
+
+
+-- detalle_organizador --
+
+componente_id (PK) (uuid) (FK de nethive.componente.id),
+tipo (text),
+material (text),
+tamaño (text),
+color (text)
+
+-- detalle_patch_panel --
+
+componente_id (PK) (uuid) (FK de nethive.componente.id),
+tipo_conector (text),
+numero_puertos (int4),
+categoria (text),
+tipo_montaje (text),
+numeracion_frontal (bool),
+panel_ciego (bool)
+
+
+-- detalle_rack --
+
+componente_id (PK) (uuid) (FK de nethive.componente.id),
+tipo (text),
+altura_u (int4),
+profundidad_cm (int4),
+ancho_cm (int4),
+ventilacion_integrada (bool),
+puertas_con_llave (bool),
+ruedas (bool),
+color (text),
+
+-- detalle_router_firewall --
+
+componente_id (PK) (uuid) (FK de nethive.componente.id),
+tipo (text),
+marca (text),
+modelo (text),
+numero_serie (text),
+interfaces (text),
+capacidad_routing_gbps (numeric),
+direccion_ip (text),
+firmware (text),
+licencias (text),
+
+-- detalle_switch --
+
+componente_id (PK) (uuid) (FK de nethive.componente.id),
+marca (text),
+modelo (text),
+numero_serie (text),
+administrable (bool),
+poe (bool),
+cantidad_puertos (int4),
+velocidad_puertos (text),
+tipo_puertos (text),
+ubicacion_en_rack (text),
+direccion_ip (text),
+firmware (text),
+
+
+-- detalle_ups --
+
+componente_id (PK) (uuid) (FK de nethive.componente.id),
+tipo (text),
+marca (text),
+modelo (text),
+voltaje_entrada (text),
+voltaje_salida (text),
+capacidad_va (int4),
+autonomia_minutos (int4),
+cantidad_tomas (int4),
+rackeable (bool),
+
+
+-- empresa --
+
+id (PK) (uuid),
+nombre (text),
+rfc (text),
+direccion (text),
+telefono  (text),
+email (text),
+fecha_creacion (timestamp),
+logo_url (text),
+
+
+-- negocio --
+id (PK) (uuid),
+empresa_id (uuid) (FK de nethive.empresa.id)
+nombre (text),
+direccion (text),
+latitud (numeric),
+longitud (numeric),
+tipo_local  (text),
+fecha_creacion (timestamp),
+logo_url (text),
+imagen_url (text)
+
+-- distribucion --
+id (PK) (uuid),
+negocio_id (uuid) (FK de nethive.negocio.id)
+tipo (text),
+nombre (text),
+descripcion (text),
+
+-- conexion_alimentacion --
+
+id (uuid) (PK),
+origen_id (uuid) (FK de nethive.componente.id),
+destino_id (uuid) (FK de nethive.componente.id),
+cable_id (uuid) (FK de nethive.componente.id, opcional),
+descripcion (text),
+activo (bool)
+
+-- rol_logico_componente --
+
+id (serial) (PK),
+nombre (text),
+descripcion (text)
+
+
+-- tipo_distribucion --
+id (serial) (PK),
+nombre (text)
+
+
+-- componente_en_rack --
+
+id UUID (PK)
+rack_id (UUID) (FK de nethive.componente.id),
+componente_id (UUID) (FK de nethive.componente.id),
+posicion_u (INT4), 
+fecha_registro (TIMESTAMP)
+
+******* VISTAS: *******
+
+-- vista_cables_en_uso --
+
+cable_id (uuid),
+cable_nombre (text),
+tipo_cable (text),
+color (text),
+tamaño (numeric),
+tipo_conector (text),
+conexion_id (uuid),
+
+-- vista_conexiones_con_cables --
+
+conexion_id (uuid),
+descripcion (text),
+activo (bool),
+origen_id (uuid),
+componente_origen (text),
+destino_id (uuid),
+componente_destino (text),
+cable_id (uuid),
+cable_usado (text),
+tipo_cable (text),
+color (text),
+tamaño (numeric),
+tipo_conector (text),
+
+
+-- vista_conexiones_por_negocio --
+
+id (uuid),
+componente_origen_id (uuid),
+componente_destino_id (uuid),
+descripcion (text),
+activo (bool),
+
+-- vista_detalle_cables -- 
+
+componente_id (uuid),
+nombre (text),
+tipo_cable (text),
+color (text),
+tamaño (numeric),
+tipo_conector (text),
+en_uso (bool),
+activo (bool),
+ubicacion (text),
+imagen_componente (text),
+nombre_negocio (text),
+logo_negocio (text),
+nombre_empresa (text),
+logo_empresa (text),
+
+
+-- vista_inventario_por_negocio -- 
+
+componente_id (uuid),
+nombre_componente (text),
+categoria (text),
+en_uso (bool),
+activo (bool),
+ubicacion (text),
+imagen_componente (text),
+negocio_id  (uuid),
+nombre_negocio (text),
+logo_negocio (text),
+imagen_negocio (text),
+empresa_id (uuid),
+nombre_empresa (text),
+logo_empresa (text),
+imagen_empresa (text)
+
+
+-- vista_negocios_con_coordenadas -- 
+
+negocio_id (uuid),
+nombre_negocio (text),
+latitud (numeric),
+longitud (numeric),
+logo_negocio (text),
+imagen_negocio (text),
+empresa_id (uuid),
+nombre_empresa (text),
+logo_empresa (text),
+imagen_empresa (text),
+
+-- vista_resumen_componentes_activos --
+
+nombre_empresa (text),
+nombre_negocio (text),
+categoría (text),
+cantidad_activos (int8),
+
+
+
+-- vista_topologia_por_negocio --
+
+negocio_id (uuid),
+nombre_negocio (text),
+distribucion_id (uuid),
+tipo_distribucion (text),
+distribucion_nombre (text),
+componente_id (uuid),
+componente_nombre (text),
+descripcion (text),
+categoria_componente (text),
+en_uso (bool),
+activo (bool),
+ubicacion (text),
+imagen_url (text),
+fecha_registro (timestamp),
+
+-- vista_alimentacion_componentes --
+
+id (uuid),
+origen_id (uuid),
+nombre_origen (text),
+categoria_origen (int4),
+
+destino_id (uuid),
+nombre_destino (text),
+categoria_destino (int4),
+
+cable_id (uuid),
+nombre_cable (text),
+categoria_cable (int4),
+
+descripcion (text),
+activo (bool)
+

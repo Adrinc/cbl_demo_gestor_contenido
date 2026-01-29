@@ -1,0 +1,78 @@
+tabla: "media_posters"
+
+
+| column_name          | data_type                |
+| -------------------- | ------------------------ |
+| media_poster_id      | bigint                   |
+| media_file_id        | bigint                   |
+| poster_file_id       | bigint                   |
+| created_at_timestamp | timestamp with time zone |
+
+
+
+tabla: "media_files"
+
+| column_name          | data_type                |
+| -------------------- | ------------------------ |
+| media_file_id        | bigint                   |
+| file_name            | text                     |
+| title                | text                     |
+| file_description     | text                     |
+| file_type            | text                     |
+| mime_type            | text                     |
+| file_extension       | text                     |
+| file_size_bytes      | bigint                   |
+| file_url             | text                     |
+| storage_path         | text                     |
+| created_at_timestamp | timestamp with time zone |
+| updated_at_timestamp | timestamp with time zone |
+| uploaded_by_user_id  | uuid                     |
+| is_public_file       | boolean                  |
+| metadata_json        | jsonb                    |
+| seconds              | bigint                   |
+| media_category_fk    | bigint                   |
+| organization_fk      | bigint                   |
+
+
+
+tabla: "media_categories"
+
+| column_name          | data_type                |
+| -------------------- | ------------------------ |
+| media_categories_id  | bigint                   |
+| created_at           | timestamp with time zone |
+| created_by           | uuid                     |
+| category_name        | text                     |
+| category_description | text                     |
+| media_file_fk        | bigint                   |
+
+
+vista: "vw_media_files_with_posters"
+
+| column_name                 | data_type                |
+| --------------------------- | ------------------------ |
+| media_file_id               | bigint                   |
+| media_file_name             | text                     |
+| media_title                 | text                     |
+| file_description            | text                     |
+| media_type                  | text                     |
+| media_mime_type             | text                     |
+| media_url                   | text                     |
+| media_storage_path          | text                     |
+| media_created_at            | timestamp with time zone |
+| category_id                 | bigint                   |
+| category_name               | text                     |
+| category_description        | text                     |
+| category_created_at         | timestamp with time zone |
+| category_image_url          | text                     |
+| category_image_storage_path | text                     |
+| media_poster_id             | bigint                   |
+| poster_file_id              | bigint                   |
+| poster_file_name            | text                     |
+| poster_title                | text                     |
+| poster_url                  | text                     |
+| poster_storage_path         | text                     |
+| poster_created_at           | timestamp with time zone |
+
+
+https://github.com/CB-Luna/energymedia_content_manager

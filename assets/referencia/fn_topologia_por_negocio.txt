@@ -1,0 +1,92 @@
+CREATE OR REPLACE FUNCTION nethive.fn_topologia_por_negocio(p_negocio_id uuid)
+RETURNS jsonb
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN (
+    SELECT jsonb_build_object(
+      'componentes', (
+        SELECT jsonb_agg(row_to_json(c))
+        FROM (
+          SELECT
+            comp.id,
+            comp.nombre,
+            comp.categoria_id,
+            cat.nombre AS categoria,
+            comp.rol_logico_id,
+            r.nombre AS rol_logico,
+            comp.descripcion,
+            comp.ubicacion,
+            comp.imagen_url,
+            comp.en_uso,
+            comp.activo,
+            comp.fecha_registro,
+            comp.distribucion_id,
+            td.nombre AS tipo_distribucion,
+            d.nombre AS nombre_distribucion
+          FROM nethive.componente comp
+          LEFT JOIN nethive.categoria_componente cat ON comp.categoria_id = cat.id
+          LEFT JOIN nethive.rol_logico_componente r ON comp.rol_logico_id = r.id
+          LEFT JOIN nethive.distribucion d ON comp.distribucion_id = d.id
+          LEFT JOIN nethive.tipo_distribucion td ON d.tipo_id = td.id
+          WHERE comp.negocio_id = p_negocio_id
+        ) AS c
+      ),
+
+      'conexiones_datos', (
+        SELECT jsonb_agg(row_to_json(cd))
+        FROM (
+          SELECT
+            cc.id,
+            cc.componente_origen_id,
+            co.nombre AS nombre_origen,
+            ro.id AS rol_logico_origen_id,
+            ro.nombre AS rol_logico_origen,
+            cc.componente_destino_id,
+            cd.nombre AS nombre_destino,
+            rd.id AS rol_logico_destino_id,
+            rd.nombre AS rol_logico_destino,
+            cc.cable_id,
+            cb.nombre AS nombre_cable,
+            cc.descripcion,
+            cc.activo
+          FROM nethive.conexion_componente cc
+          LEFT JOIN nethive.componente co ON cc.componente_origen_id = co.id
+          LEFT JOIN nethive.rol_logico_componente ro ON co.rol_logico_id = ro.id
+          LEFT JOIN nethive.componente cd ON cc.componente_destino_id = cd.id
+          LEFT JOIN nethive.rol_logico_componente rd ON cd.rol_logico_id = rd.id
+          LEFT JOIN nethive.componente cb ON cc.cable_id = cb.id
+          WHERE co.negocio_id = p_negocio_id OR cd.negocio_id = p_negocio_id
+        ) AS cd
+      ),
+
+      'conexiones_energia', (
+        SELECT jsonb_agg(row_to_json(ce))
+        FROM (
+          SELECT
+            ca.id,
+            ca.origen_id,
+            co.nombre AS nombre_origen,
+            ro.id AS rol_logico_origen_id,
+            ro.nombre AS rol_logico_origen,
+            ca.destino_id,
+            cd.nombre AS nombre_destino,
+            rd.id AS rol_logico_destino_id,
+            rd.nombre AS rol_logico_destino,
+            ca.cable_id,
+            cb.nombre AS nombre_cable,
+            ca.descripcion,
+            ca.activo
+          FROM nethive.conexion_alimentacion ca
+          LEFT JOIN nethive.componente co ON ca.origen_id = co.id
+          LEFT JOIN nethive.rol_logico_componente ro ON co.rol_logico_id = ro.id
+          LEFT JOIN nethive.componente cd ON ca.destino_id = cd.id
+          LEFT JOIN nethive.rol_logico_componente rd ON cd.rol_logico_id = rd.id
+          LEFT JOIN nethive.componente cb ON ca.cable_id = cb.id
+          WHERE co.negocio_id = p_negocio_id OR cd.negocio_id = p_negocio_id
+        ) AS ce
+      )
+    )
+  );
+END;
+$$;

@@ -1,0 +1,33 @@
+CREATE OR REPLACE FUNCTION nethive.fn_racks_con_componentes(p_negocio_id uuid)
+RETURNS jsonb
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN (
+    SELECT jsonb_agg(rack_info)
+    FROM (
+      SELECT
+        rack.id AS rack_id,
+        rack.nombre AS nombre_rack,
+        rack.ubicacion AS ubicacion_rack,
+        jsonb_agg(
+          jsonb_build_object(
+            'componente_id', comp.id,
+            'nombre', comp.nombre,
+            'categoria_id', comp.categoria_id,
+            'descripcion', comp.descripcion,
+            'ubicacion', comp.ubicacion,
+            'imagen_url', comp.imagen_url,
+            'en_uso', comp.en_uso,
+            'activo', comp.activo
+          )
+        ) AS componentes
+      FROM nethive.componente rack
+      JOIN nethive.componente_en_rack cer ON rack.id = cer.rack_id
+      JOIN nethive.componente comp ON cer.componente_id = comp.id
+      WHERE rack.negocio_id = p_negocio_id AND rack.categoria_id = 4 -- RACK
+      GROUP BY rack.id
+    ) rack_info
+  );
+END;
+$$;

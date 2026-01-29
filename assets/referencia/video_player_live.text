@@ -1,0 +1,80 @@
+import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
+
+class VideoPlayerLive extends StatefulWidget {
+  final String url;
+
+  const VideoPlayerLive({Key? key, required this.url}) : super(key: key);
+
+  @override
+  _VideoPlayerLiveState createState() => _VideoPlayerLiveState();
+}
+
+class _VideoPlayerLiveState extends State<VideoPlayerLive> {
+  late ChewieController _chewieController;
+  bool _isFullScreen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePlayer();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _chewieController.dispose();
+  }
+
+  void _initializePlayer() {
+    final videoPlayerController = VideoPlayerController.network(widget.url);
+    _chewieController = ChewieController(
+      videoPlayerController: videoPlayerController,
+      autoPlay: false,
+      looping: false,
+      showControls: true,
+      allowFullScreen: true,
+      allowMuting: true,
+      allowPlaybackSpeedChanging: false,
+      aspectRatio: videoPlayerController.value.aspectRatio,
+      customControls: CupertinoControls(
+          backgroundColor: Color.fromARGB(66, 0, 0, 0),
+          iconColor: Color.fromARGB(255, 202, 202, 202),
+          showPlayButton: true),
+    );
+  }
+
+  void _toggleFullScreen() {
+    if (!_isFullScreen) {
+      _chewieController.enterFullScreen();
+    } else {
+      _chewieController.exitFullScreen();
+    }
+    setState(() {
+      _isFullScreen = !_isFullScreen;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black,
+      child: Center(
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: _toggleFullScreen,
+            child: AspectRatio(
+              aspectRatio:
+                  _chewieController.videoPlayerController.value.aspectRatio,
+              child: Chewie(
+                controller: _chewieController,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
