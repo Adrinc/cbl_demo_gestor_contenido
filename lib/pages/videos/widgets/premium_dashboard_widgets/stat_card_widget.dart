@@ -302,10 +302,11 @@ class _PremiumStatCardState extends State<PremiumStatCard>
 
   Widget _buildContent() {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20), // Reducido de 24 a 20
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment:
+            MainAxisAlignment.start, // Cambiado de spaceBetween a start
         children: [
           // Header row: Icon + Trend
           Row(
@@ -316,7 +317,7 @@ class _PremiumStatCardState extends State<PremiumStatCard>
             ],
           ),
 
-          const Gap(16),
+          const Gap(12), // Reducido de 16 a 12
 
           // Value con animación countup
           _buildAnimatedValue(),
@@ -328,7 +329,7 @@ class _PremiumStatCardState extends State<PremiumStatCard>
 
           // Sparkline opcional
           if (widget.showSparkline && widget.sparklineData != null) ...[
-            const Gap(12),
+            const Gap(8), // Reducido de 12 a 8
             _buildSparkline(),
           ],
         ],

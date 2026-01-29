@@ -61,12 +61,16 @@ class _PremiumDashboardPageState extends State<PremiumDashboardPage>
   Future<void> _loadStatsInBackground() async {
     final provider = Provider.of<VideosProvider>(context, listen: false);
 
-    // Esperar a que el provider termine de cargar
-    if (provider.isLoading) {
+    // ✅ Esperar a que el provider termine de inicializar (no solo isLoading)
+    if (!provider.isInitialized) {
       await Future.delayed(const Duration(milliseconds: 100));
-      return _loadStatsInBackground();
+      if (mounted) {
+        return _loadStatsInBackground();
+      }
+      return;
     }
 
+    // ✅ Cargar datos reales del provider ya inicializado
     final result = await provider.getDashboardStats();
     if (mounted && result.isNotEmpty) {
       setState(() {
@@ -204,7 +208,7 @@ class _PremiumDashboardPageState extends State<PremiumDashboardPage>
       physics: const NeverScrollableScrollPhysics(),
       crossAxisSpacing: 20,
       mainAxisSpacing: 20,
-      childAspectRatio: 1.8,
+      childAspectRatio: 1.4, // Más altura para evitar overflow
       children: cards,
     );
   }

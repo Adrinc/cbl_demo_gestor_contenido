@@ -85,6 +85,7 @@ class VideosProvider extends ChangeNotifier {
 
   // ========== LOADING STATE ==========
   bool isLoading = false;
+  bool isInitialized = false; // Flag para saber si la carga inicial terminó
   String? errorMessage;
 
   // ========== CONSTRUCTOR ==========
@@ -175,7 +176,7 @@ class VideosProvider extends ChangeNotifier {
         },
       ];
 
-      // Cargar videos con duración y peso reales
+      // Cargar videos con duración y peso reales (o simulados si falla)
       mediaFiles = [];
       for (int i = 0; i < videoConfigs.length; i++) {
         final config = videoConfigs[i];
@@ -187,9 +188,8 @@ class VideosProvider extends ChangeNotifier {
           tags: config['tags'] as List<String>,
           reproducciones: config['reproducciones'] as int,
         );
-        if (videoFile != null) {
-          mediaFiles.add(videoFile);
-        }
+        // ✅ Siempre agregar el video (ya no puede ser null)
+        mediaFiles.add(videoFile);
       }
 
       // Hardcodear categorías
@@ -221,17 +221,25 @@ class VideosProvider extends ChangeNotifier {
       await _buildPlutoRows();
 
       isLoading = false;
+      isInitialized = true; // ✅ Marcamos como inicializado
       notifyListeners();
+
+      // Forzar una segunda notificación después de un frame para asegurar que los widgets se actualicen
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
     } catch (e) {
       errorMessage = 'Error inicializando datos: $e';
       isLoading = false;
+      isInitialized =
+          true; // Marcamos como inicializado incluso con error para no bloquear UI
       notifyListeners();
       print('Error en _initializeHardcodedData: $e');
     }
   }
 
   /// Helper para crear videos de demo con datos reales capturados
-  Future<MediaFileModel?> _createDemoVideoWithRealData({
+  Future<MediaFileModel> _createDemoVideoWithRealData({
     required int id,
     required String fileName,
     required String title,
@@ -243,14 +251,15 @@ class VideosProvider extends ChangeNotifier {
     final createdAt = now.subtract(Duration(days: id * 3));
     final assetPath = 'assets/videos/$fileName';
 
-    int? realDuration;
-    int? realFileSize;
+    // Valores por defecto simulados
+    int realDuration = 60; // 60 segundos por defecto
+    int realFileSize = 30000000; // 30MB por defecto
 
     try {
-      // Capturar duración real del video de assets con timeout
+      // Intentar capturar duración real del video de assets con timeout corto
       final controller = VideoPlayerController.asset(assetPath);
       await controller.initialize().timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 3), // Timeout más corto
         onTimeout: () {
           throw TimeoutException('Timeout al inicializar video');
         },
@@ -265,10 +274,25 @@ class VideosProvider extends ChangeNotifier {
       print(
           '✅ Asset "$fileName": ${realDuration}s, ${_formatFileSize(realFileSize)}');
     } catch (e) {
-      print('⚠️ No se pudo cargar "$fileName": $e');
-      return null; // Saltar video si falla
+      // ⚠️ Si falla la carga, usar valores simulados realistas
+      // Asignar duraciones variadas según tipo de video
+      if (fileName.contains('spot') || fileName.contains('promo')) {
+        realDuration = 30; // Videos cortos
+        realFileSize = 15000000; // 15MB
+      } else if (fileName.contains('disney') ||
+          fileName.contains('entertainment')) {
+        realDuration = 120; // Videos medianos
+        realFileSize = 60000000; // 60MB
+      } else {
+        realDuration = 45; // Duración media
+        realFileSize = 22000000; // 22MB
+      }
+
+      print(
+          '⚠️ No se pudo cargar "$fileName", usando valores simulados: ${realDuration}s, ${_formatFileSize(realFileSize)}');
     }
 
+    // ✅ SIEMPRE retornar el video, nunca null
     return MediaFileModel(
       mediaFileId: id,
       fileName: fileName,
@@ -277,7 +301,7 @@ class VideosProvider extends ChangeNotifier {
       fileType: 'video',
       mimeType: 'video/mp4',
       fileExtension: '.mp4',
-      fileSizeBytes: realFileSize, // ✅ Peso estimado realista
+      fileSizeBytes: realFileSize,
       fileUrl: assetPath,
       storagePath: 'videos/$fileName',
       organizationFk: organizationId,
@@ -285,11 +309,11 @@ class VideosProvider extends ChangeNotifier {
         'uploaded_at': createdAt.toIso8601String(),
         'reproducciones': reproducciones,
         'original_file_name': fileName,
-        'duration_seconds': realDuration, // ✅ Duración real
+        'duration_seconds': realDuration,
         'file_size_bytes': realFileSize,
         'tags': tags,
       },
-      seconds: realDuration, // ✅ Duración real
+      seconds: realDuration,
       isPublicFile: true,
       createdAt: createdAt,
       updatedAt: createdAt,

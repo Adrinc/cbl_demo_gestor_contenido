@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:energy_media/theme/theme.dart';
+import 'package:energy_media/providers/videos_provider.dart';
 
 /// Model para los datos del top video
 class TopVideoData {
@@ -78,12 +80,26 @@ class _Top5VideosWidgetState extends State<Top5VideosWidget>
         _error = null;
       });
 
+      // ✅ Esperar a que haya un provider disponible y esté inicializado
+      if (!mounted) return;
+
+      final provider = Provider.of<VideosProvider>(context, listen: false);
+
+      // ✅ Esperar a que el provider termine su inicialización
+      while (!provider.isInitialized && mounted) {
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
+
+      if (!mounted) return;
+
       final result = await widget.loadTopVideos();
       _topVideos = result.map((map) => TopVideoData.fromMap(map)).toList();
 
+      if (!mounted) return;
       setState(() => _isLoading = false);
       _animationController.forward();
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _error = 'Error al cargar los videos';
